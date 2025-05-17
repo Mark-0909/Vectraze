@@ -20,5 +20,10 @@ namespace Vectraze
         {
             InitializeComponent();
         }
+
+        private void AddImageBtn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

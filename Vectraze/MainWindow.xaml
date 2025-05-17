@@ -5,8 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Vectraze"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Border BorderBrush="Black" BorderThickness="1"/>
+        Title="MainWindow" Height="519" Width="822" Background="#FFCECECE" WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="296,0,0,0">
+        <Border BorderBrush="Black" BorderThickness="1" Background="#FFCECECE" Margin="94,96,78,72">
+            <Button x:Name="AddImageBtn" Content="Button" Margin="123,110,123,119" Click="AddImageBtn_Click"/>
+        </Border>
+        <Image x:Name="ImagePreview" HorizontalAlignment="Left" Height="304" Margin="107,112,0,0" VerticalAlignment="Top" Width="325"/>
+
     </Grid>
+
+
 </Window>
