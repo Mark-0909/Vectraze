@@ -8,10 +8,28 @@
         Title="MainWindow" Height="519" Width="822" Background="#FFCECECE" WindowStartupLocation="CenterScreen">
 
     <Grid Margin="296,0,0,0">
-        <Border BorderBrush="Black" BorderThickness="1" Background="#FFCECECE" Margin="94,96,78,72">
-            <Button x:Name="AddImageBtn" Content="Button" Margin="123,110,123,119" Click="AddImageBtn_Click"/>
+        <Border x:Name="DropBorder"
+        BorderBrush="Black"
+        BorderThickness="1"
+        Background="#FFCECECE"
+        Margin="94,96,78,72"
+        AllowDrop="True"
+        Drop="DropBorder_Drop"
+        DragEnter="DropBorder_DragEnter">
+
+            <Button x:Name="AddImageBtn"
+            Content="Add Image"
+            Margin="123,110,123,119"
+            Click="AddImageBtn_Click"/>
         </Border>
-        <Image x:Name="ImagePreview" HorizontalAlignment="Left" Height="304" Margin="107,112,0,0" VerticalAlignment="Top" Width="325"/>
+
+        <Image x:Name="ImagePreview"
+       HorizontalAlignment="Left"
+       Height="304"
+       Margin="107,112,0,0"
+       VerticalAlignment="Top"
+       Width="325"/>
+
 
     </Grid>
 

@@ -43,5 +43,49 @@ namespace Vectraze
                 ImagePreview.Source = bitmap;
             }
         }
+
+        private void DropBorder_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        private void DropBorder_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (files.Length > 0)
+                {
+                    string filePath = files[0];
+
+                    string extension = System.IO.Path.GetExtension(filePath).ToLower();
+                    string[] allowedExtensions = { ".png", ".jpg", ".jpeg", ".bmp", ".gif" };
+
+                    if (allowedExtensions.Contains(extension))
+                    {
+                        BitmapImage bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.UriSource = new Uri(filePath);
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.EndInit();
+
+                        ImagePreview.Source = bitmap;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Unsupported file format. Please drop an image.");
+                    }
+                }
+            }
+        }
+
     }
 }
