@@ -11,7 +11,7 @@
               VerticalScrollBarVisibility="Auto"
               Background="Gray"
               Margin="20,36,400,33">
-            <Canvas x:Name="RasterCanvas" Width="358" Height="366" Background="Transparent"/>
+            <Canvas x:Name="PixelCanvas" Width="358" Height="366" Background="Transparent"/>
         </ScrollViewer>
 
     </Grid>

@@ -87,5 +87,10 @@ namespace Vectraze
             }
         }
 
+        private void RasterizedBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Pixelated PixelUsercontrol = new Pixelated((BitmapImage)ImagePreview.Source);
+            this.Content = PixelUsercontrol;
+        }
     }
 }

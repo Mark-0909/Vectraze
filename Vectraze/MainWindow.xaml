@@ -14,6 +14,7 @@
         </Border>
 
         <Image x:Name="ImagePreview" HorizontalAlignment="Left" Height="304" Margin="107,112,0,0" VerticalAlignment="Top" Width="325"/>
+        <Button x:Name="RasterizedBtn" Content="Rasterized" HorizontalAlignment="Center" Margin="0,446,0,0" VerticalAlignment="Top" Width="130" Height="38" Click="RasterizedBtn_Click"/>
 
 
     </Grid>
