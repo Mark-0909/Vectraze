@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Vectraze
 {
@@ -23,15 +24,18 @@ namespace Vectraze
         public Pixelated(BitmapImage bitmapImage)
         {
             InitializeComponent();
-            RenderPixelatedImage(bitmapImage);
+            PixelCanvas.Loaded += (s, e) =>
+            {
+                RenderPixelatedImage(bitmapImage);
+            };
         }
 
         private void RenderPixelatedImage(BitmapImage image)
         {
-            int pixelWidth = 32; // or user-selected size
+            int pixelWidth = 32;
             int pixelHeight = 32;
 
-            // Resize the image down to small resolution
+            // Resize image to low-res
             TransformedBitmap resized = new TransformedBitmap(image, new ScaleTransform(
                 pixelWidth / (double)image.PixelWidth,
                 pixelHeight / (double)image.PixelHeight));
@@ -41,9 +45,26 @@ namespace Vectraze
             byte[] pixels = new byte[stride * pixelHeight];
             resized.CopyPixels(pixels, stride, 0);
 
-            int cellSize = 16; // Size of each drawn "pixel"
+            // Get canvas size
+            double canvasWidth = PixelCanvas.ActualWidth;
+            double canvasHeight = PixelCanvas.ActualHeight;
+
+            // If canvas isn't properly sized yet, fallback to fixed size
+            if (canvasWidth == 0 || canvasHeight == 0)
+            {
+                canvasWidth = 512;
+                canvasHeight = 512;
+            }
+
+            // Calculate proportional cell size
+            double cellSizeX = canvasWidth / pixelWidth;
+            double cellSizeY = canvasHeight / pixelHeight;
+            double cellSize = Math.Min(cellSizeX, cellSizeY);
+
             PixelCanvas.Width = pixelWidth * cellSize;
             PixelCanvas.Height = pixelHeight * cellSize;
+
+            PixelCanvas.Children.Clear();
 
             for (int y = 0; y < pixelHeight; y++)
             {
@@ -66,10 +87,11 @@ namespace Vectraze
 
                     Canvas.SetLeft(rect, x * cellSize);
                     Canvas.SetTop(rect, y * cellSize);
-
                     PixelCanvas.Children.Add(rect);
                 }
             }
         }
+
+
     }
 }
