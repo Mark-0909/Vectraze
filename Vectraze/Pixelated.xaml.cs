@@ -32,10 +32,25 @@ namespace Vectraze
 
         private void RenderPixelatedImage(BitmapImage image)
         {
-            int pixelWidth = 32;
-            int pixelHeight = 32;
+            int targetSize = 32; // The size of the longer edge in the pixel grid
+            int pixelWidth, pixelHeight;
 
-            // Resize image to low-res
+            // Maintain aspect ratio based on original image
+            double aspectRatio = image.PixelWidth / (double)image.PixelHeight;
+            if (aspectRatio >= 1.0)
+            {
+                // Landscape or square
+                pixelWidth = targetSize;
+                pixelHeight = (int)(targetSize / aspectRatio);
+            }
+            else
+            {
+                // Portrait
+                pixelHeight = targetSize;
+                pixelWidth = (int)(targetSize * aspectRatio);
+            }
+
+            // Resize image to lower resolution (pixelated size)
             TransformedBitmap resized = new TransformedBitmap(image, new ScaleTransform(
                 pixelWidth / (double)image.PixelWidth,
                 pixelHeight / (double)image.PixelHeight));
@@ -49,7 +64,6 @@ namespace Vectraze
             double canvasWidth = PixelCanvas.ActualWidth;
             double canvasHeight = PixelCanvas.ActualHeight;
 
-            // If canvas isn't properly sized yet, fallback to fixed size
             if (canvasWidth == 0 || canvasHeight == 0)
             {
                 canvasWidth = 512;
@@ -59,10 +73,13 @@ namespace Vectraze
             // Calculate proportional cell size
             double cellSizeX = canvasWidth / pixelWidth;
             double cellSizeY = canvasHeight / pixelHeight;
-            double cellSize = Math.Min(cellSizeX, cellSizeY);
+            double cellSize = Math.Min(cellSizeX, cellSizeY); // uniform cells
 
-            PixelCanvas.Width = pixelWidth * cellSize;
-            PixelCanvas.Height = pixelHeight * cellSize;
+            double totalImageWidth = pixelWidth * cellSize;
+            double totalImageHeight = pixelHeight * cellSize;
+
+            double offsetX = (canvasWidth - totalImageWidth) / 2;
+            double offsetY = (canvasHeight - totalImageHeight) / 2;
 
             PixelCanvas.Children.Clear();
 
@@ -85,12 +102,13 @@ namespace Vectraze
                         StrokeThickness = 0.25
                     };
 
-                    Canvas.SetLeft(rect, x * cellSize);
-                    Canvas.SetTop(rect, y * cellSize);
+                    Canvas.SetLeft(rect, offsetX + x * cellSize);
+                    Canvas.SetTop(rect, offsetY + y * cellSize);
                     PixelCanvas.Children.Add(rect);
                 }
             }
         }
+
 
 
     }
