@@ -13,6 +13,7 @@
               Margin="20,36,400,33">
             <Canvas x:Name="PixelCanvas" Width="358" Height="366" Background="Transparent"/>
         </ScrollViewer>
+        <Button x:Name="SaveBtn" Content="Save" HorizontalAlignment="Left" Margin="553,401,0,0" VerticalAlignment="Top" Width="108" Height="28" Click="SaveBtn_Click" />
 
     </Grid>
 </UserControl>

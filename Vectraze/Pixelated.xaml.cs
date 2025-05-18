@@ -1,24 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.Win32;
 
 namespace Vectraze
 {
-    /// <summary>
-    /// Interaction logic for Pixelated.xaml
-    /// </summary>
     public partial class Pixelated : UserControl
     {
         public Pixelated(BitmapImage bitmapImage)
@@ -39,28 +29,24 @@ namespace Vectraze
             double aspectRatio = image.PixelWidth / (double)image.PixelHeight;
             if (aspectRatio >= 1.0)
             {
-                // Landscape or square
                 pixelWidth = targetSize;
                 pixelHeight = (int)(targetSize / aspectRatio);
             }
             else
             {
-                // Portrait
                 pixelHeight = targetSize;
                 pixelWidth = (int)(targetSize * aspectRatio);
             }
 
-            // Resize image to lower resolution (pixelated size)
+            // Resize image to lower resolution
             TransformedBitmap resized = new TransformedBitmap(image, new ScaleTransform(
                 pixelWidth / (double)image.PixelWidth,
                 pixelHeight / (double)image.PixelHeight));
 
-            // Copy pixel data
             int stride = pixelWidth * 4;
             byte[] pixels = new byte[stride * pixelHeight];
             resized.CopyPixels(pixels, stride, 0);
 
-            // Get canvas size
             double canvasWidth = PixelCanvas.ActualWidth;
             double canvasHeight = PixelCanvas.ActualHeight;
 
@@ -70,10 +56,9 @@ namespace Vectraze
                 canvasHeight = 512;
             }
 
-            // Calculate proportional cell size
             double cellSizeX = canvasWidth / pixelWidth;
             double cellSizeY = canvasHeight / pixelHeight;
-            double cellSize = Math.Min(cellSizeX, cellSizeY); // uniform cells
+            double cellSize = Math.Min(cellSizeX, cellSizeY);
 
             double totalImageWidth = pixelWidth * cellSize;
             double totalImageHeight = pixelHeight * cellSize;
@@ -83,6 +68,7 @@ namespace Vectraze
 
             PixelCanvas.Children.Clear();
 
+            // 🟩 Draw pixelated image (no stroke)
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -97,9 +83,8 @@ namespace Vectraze
                     {
                         Width = cellSize,
                         Height = cellSize,
-                        Fill = new SolidColorBrush(Color.FromArgb(a, r, g, b)),
-                        Stroke = Brushes.Gray,
-                        StrokeThickness = 0.25
+                        Fill = new SolidColorBrush(Color.FromArgb(a, r, g, b))
+                        // No Stroke
                     };
 
                     Canvas.SetLeft(rect, offsetX + x * cellSize);
@@ -109,7 +94,41 @@ namespace Vectraze
             }
         }
 
+        private void SaveBtn_Click(object sender, RoutedEventArgs e)
+        {
+            double width = PixelCanvas.ActualWidth;
+            double height = PixelCanvas.ActualHeight;
 
+            if (width == 0 || height == 0)
+            {
+                MessageBox.Show("Canvas is empty or has no size.");
+                return;
+            }
 
+            RenderTargetBitmap rtb = new RenderTargetBitmap(
+                (int)width, (int)height, 96, 96, PixelFormats.Pbgra32);
+
+            rtb.Render(PixelCanvas);
+
+            PngBitmapEncoder pngEncoder = new PngBitmapEncoder();
+            pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            SaveFileDialog dialog = new SaveFileDialog
+            {
+                FileName = "pixelated_image",
+                DefaultExt = ".png",
+                Filter = "PNG Image|*.png"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                using (var fs = new FileStream(dialog.FileName, FileMode.Create))
+                {
+                    pngEncoder.Save(fs);
+                }
+
+                MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
     }
 }
