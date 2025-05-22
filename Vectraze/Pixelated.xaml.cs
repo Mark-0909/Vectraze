@@ -11,6 +11,7 @@ namespace Vectraze
 {
     public partial class Pixelated : UserControl
     {
+        private double currentZoom = 1.0;
         public Pixelated(BitmapImage bitmapImage)
         {
             InitializeComponent();
@@ -142,7 +143,19 @@ namespace Vectraze
                 MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+        private void ScrollArea_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            const double zoomStep = 0.1;
+            if (e.Delta > 0)
+                currentZoom += zoomStep;
+            else
+                currentZoom = Math.Max(0.1, currentZoom - zoomStep); // Prevent zooming out too far
 
+            canvasScaleTransform.ScaleX = currentZoom;
+            canvasScaleTransform.ScaleY = currentZoom;
+
+            e.Handled = true;
+        }
         private void BackBtn_Click(object sender, RoutedEventArgs e)
         {
             // Find the parent Window
