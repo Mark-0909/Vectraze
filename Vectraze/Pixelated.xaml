@@ -8,11 +8,19 @@
              d:DesignHeight="450" d:DesignWidth="800">
 
     <Grid Background="#FFE4E4E4">
-        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+        <ScrollViewer x:Name="ScrollArea"
+                      HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
                       Margin="20,36,400,33"
                       PreviewMouseWheel="ScrollArea_PreviewMouseWheel">
-            <Canvas x:Name="PixelCanvas" Width="358" Height="366" Background="Transparent">
+            <Canvas x:Name="PixelCanvas"
+                    Width="358"
+                    Height="366"
+                    Background="Transparent"
+                    MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
+                    MouseMove="PixelCanvas_MouseMove"
+                    MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"
+                    Cursor="Hand">
                 <Canvas.LayoutTransform>
                     <ScaleTransform x:Name="canvasScaleTransform" ScaleX="1" ScaleY="1"/>
                 </Canvas.LayoutTransform>

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -12,6 +13,8 @@ namespace Vectraze
     public partial class Pixelated : UserControl
     {
         private double currentZoom = 1.0;
+        private Point? lastDragPoint;
+
         public Pixelated(BitmapImage bitmapImage)
         {
             InitializeComponent();
@@ -109,20 +112,27 @@ namespace Vectraze
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
-            double width = PixelCanvas.ActualWidth;
-            double height = PixelCanvas.ActualHeight;
+            // Save current transform so we can restore it later
+            var originalTransform = PixelCanvas.LayoutTransform;
 
-            if (width == 0 || height == 0)
-            {
-                MessageBox.Show("Canvas is empty or has no size.");
-                return;
-            }
+            // Temporarily remove zoom so we can render at actual canvas size
+            PixelCanvas.LayoutTransform = Transform.Identity;
 
+            // Measure and arrange the canvas at its desired size
+            Size size = new Size(PixelCanvas.ActualWidth, PixelCanvas.ActualHeight);
+            PixelCanvas.Measure(size);
+            PixelCanvas.Arrange(new Rect(size));
+
+            // Create bitmap at canvas size
             RenderTargetBitmap rtb = new RenderTargetBitmap(
-                (int)width, (int)height, 96, 96, PixelFormats.Pbgra32);
+                (int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32);
 
             rtb.Render(PixelCanvas);
 
+            // Restore the original zoom transform
+            PixelCanvas.LayoutTransform = originalTransform;
+
+            // Encode and save
             PngBitmapEncoder pngEncoder = new PngBitmapEncoder();
             pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
 
@@ -143,33 +153,56 @@ namespace Vectraze
                 MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-        private void ScrollArea_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+
+
+        private void ScrollArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             const double zoomStep = 0.1;
             if (e.Delta > 0)
                 currentZoom += zoomStep;
             else
-                currentZoom = Math.Max(0.1, currentZoom - zoomStep); // Prevent zooming out too far
+                currentZoom = Math.Max(0.1, currentZoom - zoomStep);
 
             canvasScaleTransform.ScaleX = currentZoom;
             canvasScaleTransform.ScaleY = currentZoom;
 
             e.Handled = true;
         }
+
         private void BackBtn_Click(object sender, RoutedEventArgs e)
         {
-            // Find the parent Window
             Window currentWindow = Window.GetWindow(this);
-
-            // Create and show a new MainWindow
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
-
-            // Close the current window
             currentWindow?.Close();
         }
 
+        // --- Panning Logic ---
+        private void PixelCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            lastDragPoint = e.GetPosition(ScrollArea);
+            PixelCanvas.CaptureMouse();
+        }
 
+        private void PixelCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point currentPos = e.GetPosition(ScrollArea);
+                double offsetX = currentPos.X - lastDragPoint.Value.X;
+                double offsetY = currentPos.Y - lastDragPoint.Value.Y;
 
+                ScrollArea.ScrollToHorizontalOffset(ScrollArea.HorizontalOffset - offsetX);
+                ScrollArea.ScrollToVerticalOffset(ScrollArea.VerticalOffset - offsetY);
+
+                lastDragPoint = currentPos;
+            }
+        }
+
+        private void PixelCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            PixelCanvas.ReleaseMouseCapture();
+            lastDragPoint = null;
+        }
     }
 }
