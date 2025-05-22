@@ -14,18 +14,14 @@ namespace Vectraze
         public Pixelated(BitmapImage bitmapImage)
         {
             InitializeComponent();
-            PixelCanvas.Loaded += (s, e) =>
-            {
-                RenderPixelatedImage(bitmapImage);
-            };
+            PixelCanvas.Loaded += (s, e) => RenderPixelatedImage(bitmapImage);
         }
 
         private void RenderPixelatedImage(BitmapImage image)
         {
-            int targetSize = 32; // The size of the longer edge in the pixel grid
+            int targetSize = 32;
             int pixelWidth, pixelHeight;
 
-            // Maintain aspect ratio based on original image
             double aspectRatio = image.PixelWidth / (double)image.PixelHeight;
             if (aspectRatio >= 1.0)
             {
@@ -38,7 +34,6 @@ namespace Vectraze
                 pixelWidth = (int)(targetSize * aspectRatio);
             }
 
-            // Resize image to lower resolution
             TransformedBitmap resized = new TransformedBitmap(image, new ScaleTransform(
                 pixelWidth / (double)image.PixelWidth,
                 pixelHeight / (double)image.PixelHeight));
@@ -58,17 +53,16 @@ namespace Vectraze
 
             double cellSizeX = canvasWidth / pixelWidth;
             double cellSizeY = canvasHeight / pixelHeight;
-            double cellSize = Math.Min(cellSizeX, cellSizeY);
+            double cellSize = Math.Floor(Math.Min(cellSizeX, cellSizeY));
 
             double totalImageWidth = pixelWidth * cellSize;
             double totalImageHeight = pixelHeight * cellSize;
 
-            double offsetX = (canvasWidth - totalImageWidth) / 2;
-            double offsetY = (canvasHeight - totalImageHeight) / 2;
+            double offsetX = Math.Floor((canvasWidth - totalImageWidth) / 2);
+            double offsetY = Math.Floor((canvasHeight - totalImageHeight) / 2);
 
             PixelCanvas.Children.Clear();
 
-            // 🟩 Draw pixelated image (no stroke)
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -84,7 +78,6 @@ namespace Vectraze
                         Width = cellSize,
                         Height = cellSize,
                         Fill = new SolidColorBrush(Color.FromArgb(a, r, g, b))
-                        // No Stroke
                     };
 
                     Canvas.SetLeft(rect, offsetX + x * cellSize);
@@ -130,5 +123,26 @@ namespace Vectraze
                 MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BackBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // Find the parent Window
+            Window currentWindow = Window.GetWindow(this);
+
+            // Create and show a new MainWindow
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
+
+            // Close the current window
+            currentWindow?.Close();
+        }
+
+
+
     }
 }
