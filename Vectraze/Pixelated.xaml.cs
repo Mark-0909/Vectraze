@@ -271,24 +271,23 @@ namespace Vectraze
         }
 
         private void ColorPickerBtn_Click(object sender, RoutedEventArgs e)
-        {
-            // Toggle visibility of the color picker
-            if (inlineColorPicker.Visibility == Visibility.Visible)
-                inlineColorPicker.Visibility = Visibility.Collapsed;
-            else
-                inlineColorPicker.Visibility = Visibility.Visible;
-        }
+{
+    // Toggle visibility of the color picker
+    if (inlineColorPicker.Visibility == Visibility.Visible)
+        inlineColorPicker.Visibility = Visibility.Collapsed;
+    else
+        inlineColorPicker.Visibility = Visibility.Visible;
+}
 
-        private void InlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue.HasValue)
-            {
-                Color selectedColor = e.NewValue.Value;
-                colorPickerBtn.Background = new SolidColorBrush(selectedColor);
-                // Optionally also update PixelCanvas background here:
-                PixelCanvas.Background = new SolidColorBrush(selectedColor);
-            }
-        }
+private void InlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+{
+    if (e.NewValue.HasValue)
+    {
+        Color selectedColor = e.NewValue.Value;
+        colorPickerBtn.Background = new SolidColorBrush(selectedColor);
+        // Optionally also update PixelCanvas background here:
+    }
+}
 
 
     }
