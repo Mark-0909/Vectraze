@@ -8,6 +8,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 
+
+
+
+
 namespace Vectraze
 {
     public partial class Pixelated : UserControl
@@ -126,33 +130,50 @@ namespace Vectraze
             // Create bitmap at canvas size
             RenderTargetBitmap rtb = new RenderTargetBitmap(
                 (int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32);
-
             rtb.Render(PixelCanvas);
 
             // Restore the original zoom transform
             PixelCanvas.LayoutTransform = originalTransform;
 
-            // Encode and save
-            PngBitmapEncoder pngEncoder = new PngBitmapEncoder();
-            pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
-
+            // Show SaveFileDialog with multiple format options
             SaveFileDialog dialog = new SaveFileDialog
             {
                 FileName = "pixelated_image",
-                DefaultExt = ".png",
-                Filter = "PNG Image|*.png"
+                Filter = "PNG Image (*.png)|*.png|JPEG Image (*.jpg;*.jpeg)|*.jpg;*.jpeg|Bitmap Image (*.bmp)|*.bmp",
+                DefaultExt = ".png"
             };
 
             if (dialog.ShowDialog() == true)
             {
+                BitmapEncoder encoder;
+
+                // Choose encoder based on extension
+                string ext = System.IO.Path.GetExtension(dialog.FileName).ToLower();
+                switch (ext)
+                {
+                    case ".jpg":
+                    case ".jpeg":
+                        encoder = new JpegBitmapEncoder();
+                        break;
+                    case ".bmp":
+                        encoder = new BmpBitmapEncoder();
+                        break;
+                    default:
+                        encoder = new PngBitmapEncoder();
+                        break;
+                }
+
+                encoder.Frames.Add(BitmapFrame.Create(rtb));
+
                 using (var fs = new FileStream(dialog.FileName, FileMode.Create))
                 {
-                    pngEncoder.Save(fs);
+                    encoder.Save(fs);
                 }
 
                 MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
 
 
         private void ScrollArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
