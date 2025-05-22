@@ -63,6 +63,25 @@ namespace Vectraze
 
             PixelCanvas.Children.Clear();
 
+            // Draw checkerboard background
+            for (int y = 0; y < pixelHeight; y++)
+            {
+                for (int x = 0; x < pixelWidth; x++)
+                {
+                    Rectangle bgSquare = new Rectangle
+                    {
+                        Width = cellSize,
+                        Height = cellSize,
+                        Fill = new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gray)
+                    };
+
+                    Canvas.SetLeft(bgSquare, offsetX + x * cellSize);
+                    Canvas.SetTop(bgSquare, offsetY + y * cellSize);
+                    PixelCanvas.Children.Add(bgSquare);
+                }
+            }
+
+            // Draw pixelated image
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -122,11 +141,6 @@ namespace Vectraze
 
                 MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void BackBtn_Click(object sender, RoutedEventArgs e)
