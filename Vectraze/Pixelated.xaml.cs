@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,29 +9,33 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 
-
-
-
-
 namespace Vectraze
 {
     public partial class Pixelated : UserControl
     {
         private double currentZoom = 1.0;
         private Point? lastDragPoint;
+        private BitmapImage originalImage;
+        private double aspectRatio;
+        public int targetSize = 32;
 
         public Pixelated(BitmapImage bitmapImage)
         {
             InitializeComponent();
-            PixelCanvas.Loaded += (s, e) => RenderPixelatedImage(bitmapImage);
+            originalImage = bitmapImage;
+            aspectRatio = bitmapImage.PixelWidth / (double)bitmapImage.PixelHeight;
+
+            PixelCanvas.Loaded += (s, e) => RenderPixelatedImage(originalImage, targetSize);
+
+            widthTB.TextChanged += WidthTB_TextChange;
+            heightTB.TextChanged += HeightTB_TextChange;
         }
 
-        private void RenderPixelatedImage(BitmapImage image)
+        private void RenderPixelatedImage(BitmapImage image, int size)
         {
-            int targetSize = 32;
+            targetSize = size;
             int pixelWidth, pixelHeight;
 
-            double aspectRatio = image.PixelWidth / (double)image.PixelHeight;
             if (aspectRatio >= 1.0)
             {
                 pixelWidth = targetSize;
@@ -41,6 +46,9 @@ namespace Vectraze
                 pixelHeight = targetSize;
                 pixelWidth = (int)(targetSize * aspectRatio);
             }
+
+            widthTB.Text = pixelWidth.ToString();
+            heightTB.Text = pixelHeight.ToString();
 
             TransformedBitmap resized = new TransformedBitmap(image, new ScaleTransform(
                 pixelWidth / (double)image.PixelWidth,
@@ -71,7 +79,6 @@ namespace Vectraze
 
             PixelCanvas.Children.Clear();
 
-            // Draw checkerboard background
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -89,7 +96,6 @@ namespace Vectraze
                 }
             }
 
-            // Draw pixelated image
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -116,26 +122,19 @@ namespace Vectraze
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
-            // Save current transform so we can restore it later
             var originalTransform = PixelCanvas.LayoutTransform;
-
-            // Temporarily remove zoom so we can render at actual canvas size
             PixelCanvas.LayoutTransform = Transform.Identity;
 
-            // Measure and arrange the canvas at its desired size
             Size size = new Size(PixelCanvas.ActualWidth, PixelCanvas.ActualHeight);
             PixelCanvas.Measure(size);
             PixelCanvas.Arrange(new Rect(size));
 
-            // Create bitmap at canvas size
             RenderTargetBitmap rtb = new RenderTargetBitmap(
                 (int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32);
             rtb.Render(PixelCanvas);
 
-            // Restore the original zoom transform
             PixelCanvas.LayoutTransform = originalTransform;
 
-            // Show SaveFileDialog with multiple format options
             SaveFileDialog dialog = new SaveFileDialog
             {
                 FileName = "pixelated_image",
@@ -147,7 +146,6 @@ namespace Vectraze
             {
                 BitmapEncoder encoder;
 
-                // Choose encoder based on extension
                 string ext = System.IO.Path.GetExtension(dialog.FileName).ToLower();
                 switch (ext)
                 {
@@ -174,15 +172,11 @@ namespace Vectraze
             }
         }
 
-
-
         private void ScrollArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             const double zoomStep = 0.1;
-            if (e.Delta > 0)
-                currentZoom += zoomStep;
-            else
-                currentZoom = Math.Max(0.1, currentZoom - zoomStep);
+            currentZoom += e.Delta > 0 ? zoomStep : -zoomStep;
+            currentZoom = Math.Max(0.1, currentZoom);
 
             canvasScaleTransform.ScaleX = currentZoom;
             canvasScaleTransform.ScaleY = currentZoom;
@@ -198,7 +192,6 @@ namespace Vectraze
             currentWindow?.Close();
         }
 
-        // --- Panning Logic ---
         private void PixelCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             lastDragPoint = e.GetPosition(ScrollArea);
@@ -224,6 +217,56 @@ namespace Vectraze
         {
             PixelCanvas.ReleaseMouseCapture();
             lastDragPoint = null;
+        }
+
+        private void ResizeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (int.TryParse(heightTB.Text, out int newSize))
+            {
+                PixelCanvas.Children.Clear();
+                RenderPixelatedImage(originalImage, newSize);
+            }
+            else
+            {
+                MessageBox.Show("Invalid height input.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void HeightTB_TextChange(object sender, TextChangedEventArgs e)
+        {
+            if (!heightTB.IsFocused) return;
+
+            ValidateIntegerInput(heightTB);
+            if (double.TryParse(heightTB.Text, out double newHeight))
+            {
+                int newWidth = (int)Math.Round(newHeight * aspectRatio);
+                widthTB.Text = newWidth.ToString();
+            }
+        }
+
+        private void WidthTB_TextChange(object sender, TextChangedEventArgs e)
+        {
+            if (!widthTB.IsFocused) return;
+
+            ValidateIntegerInput(widthTB);
+            if (double.TryParse(widthTB.Text, out double newWidth))
+            {
+                int newHeight = (int)Math.Round(newWidth / aspectRatio);
+                heightTB.Text = newHeight.ToString();
+            }
+        }
+
+        private void ValidateIntegerInput(TextBox textBox)
+        {
+            string input = textBox.Text;
+            string filtered = new string(input.Where(char.IsDigit).ToArray());
+
+            if (filtered != input)
+            {
+                int caretIndex = textBox.CaretIndex;
+                textBox.Text = filtered;
+                textBox.CaretIndex = Math.Min(caretIndex, filtered.Length);
+            }
         }
     }
 }

@@ -13,21 +13,29 @@
                       VerticalScrollBarVisibility="Auto"
                       Margin="20,36,400,33"
                       PreviewMouseWheel="ScrollArea_PreviewMouseWheel">
-            <Canvas x:Name="PixelCanvas"
-                    Width="358"
-                    Height="366"
-                    Background="Transparent"
-                    MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
-                    MouseMove="PixelCanvas_MouseMove"
-                    MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"
-                    Cursor="Hand">
-                <Canvas.LayoutTransform>
-                    <ScaleTransform x:Name="canvasScaleTransform" ScaleX="1" ScaleY="1"/>
-                </Canvas.LayoutTransform>
-            </Canvas>
+
+            <!-- Added Viewbox here, wrapping Canvas -->
+            <Viewbox Stretch="Uniform">
+                <Canvas x:Name="PixelCanvas"
+                        Width="358"
+                        Height="366"
+                        Background="Transparent"
+                        MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
+                        MouseMove="PixelCanvas_MouseMove"
+                        MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"
+                        Cursor="Hand">
+                    <Canvas.LayoutTransform>
+                        <ScaleTransform x:Name="canvasScaleTransform" ScaleX="1" ScaleY="1"/>
+                    </Canvas.LayoutTransform>
+                </Canvas>
+            </Viewbox>
+
         </ScrollViewer>
 
         <Button x:Name="SaveBtn" Content="Save" HorizontalAlignment="Left" Margin="553,401,0,0" VerticalAlignment="Top" Width="108" Height="28" Click="SaveBtn_Click" />
-        <Button x:Name="BackBtn" Content="Back" HorizontalAlignment="Left" Margin="741,36,0,0" VerticalAlignment="Top" Click="BackBtn_Click" />
+        <Button x:Name="BackBtn" Content="Back" HorizontalAlignment="Left" Margin="772,0,0,0" VerticalAlignment="Top" Click="BackBtn_Click" />
+        <TextBox x:Name="heightTB" HorizontalAlignment="Left" Margin="530,46,0,0" TextWrapping="Wrap" Text="32" VerticalAlignment="Top" Width="51" Height="19" TextChanged="HeightTB_TextChange"/>
+        <TextBox x:Name="widthTB" HorizontalAlignment="Left" Margin="607,46,0,0" TextWrapping="Wrap" Text="32" VerticalAlignment="Top" Width="51" Height="19" TextChanged="WidthTB_TextChange"/>
+        <Button x:Name="ResizeBtn" Content="Resize" HorizontalAlignment="Left" Margin="721,45,0,0" VerticalAlignment="Top" Click="ResizeBtn_Click"/>
     </Grid>
 </UserControl>
