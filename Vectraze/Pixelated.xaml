@@ -3,18 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:local="clr-namespace:Vectraze"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
-    <Grid Background="#FFE4E4E4">
+    <Grid x:Name="ColorDialogueBtn" Background="#FFE4E4E4">
         <ScrollViewer x:Name="ScrollArea"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
                       Margin="20,36,400,33"
                       PreviewMouseWheel="ScrollArea_PreviewMouseWheel">
 
-            <!-- Added Viewbox here, wrapping Canvas -->
+            <!-- Viewbox wrapping the Canvas -->
             <Viewbox Stretch="Uniform">
                 <Canvas x:Name="PixelCanvas"
                         Width="358"
@@ -34,8 +35,16 @@
 
         <Button x:Name="SaveBtn" Content="Save" HorizontalAlignment="Left" Margin="553,401,0,0" VerticalAlignment="Top" Width="108" Height="28" Click="SaveBtn_Click" />
         <Button x:Name="BackBtn" Content="Back" HorizontalAlignment="Left" Margin="772,0,0,0" VerticalAlignment="Top" Click="BackBtn_Click" />
+
         <TextBox x:Name="heightTB" HorizontalAlignment="Left" Margin="530,46,0,0" TextWrapping="Wrap" Text="32" VerticalAlignment="Top" Width="51" Height="19" TextChanged="HeightTB_TextChange"/>
         <TextBox x:Name="widthTB" HorizontalAlignment="Left" Margin="607,46,0,0" TextWrapping="Wrap" Text="32" VerticalAlignment="Top" Width="51" Height="19" TextChanged="WidthTB_TextChange"/>
         <Button x:Name="ResizeBtn" Content="Resize" HorizontalAlignment="Left" Margin="721,45,0,0" VerticalAlignment="Top" Click="ResizeBtn_Click"/>
+
+        <!-- Inline Color Picker next to the button -->
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="512,131,14,0" Height="44" >
+            <Button x:Name="colorPickerBtn" Content="Pick Color" Click="ColorPickerBtn_Click" />
+            <xctk:ColorPicker x:Name="inlineColorPicker" Width="150" Height="30" 
+                              Visibility="Collapsed" SelectedColorChanged="InlineColorPicker_SelectedColorChanged" />
+        </StackPanel>
     </Grid>
 </UserControl>

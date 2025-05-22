@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
+using Xceed.Wpf.Toolkit;
 
 namespace Vectraze
 {
@@ -168,7 +169,7 @@ namespace Vectraze
                     encoder.Save(fs);
                 }
 
-                MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -228,7 +229,7 @@ namespace Vectraze
             }
             else
             {
-                MessageBox.Show("Invalid height input.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Invalid height input.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -268,5 +269,27 @@ namespace Vectraze
                 textBox.CaretIndex = Math.Min(caretIndex, filtered.Length);
             }
         }
+
+        private void ColorPickerBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // Toggle visibility of the color picker
+            if (inlineColorPicker.Visibility == Visibility.Visible)
+                inlineColorPicker.Visibility = Visibility.Collapsed;
+            else
+                inlineColorPicker.Visibility = Visibility.Visible;
+        }
+
+        private void InlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+            {
+                Color selectedColor = e.NewValue.Value;
+                colorPickerBtn.Background = new SolidColorBrush(selectedColor);
+                // Optionally also update PixelCanvas background here:
+                PixelCanvas.Background = new SolidColorBrush(selectedColor);
+            }
+        }
+
+
     }
 }
