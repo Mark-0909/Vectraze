@@ -102,10 +102,23 @@
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Background" Value="#99FFFFFF"/>
                             </Trigger>
+                            <!-- ADDED IsEnabled Trigger to TopBarButtonStyle for icons -->
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <!-- NEW Style for Icon Buttons in the Top Bar -->
+        <Style x:Key="IconTopBarButtonStyle" TargetType="Button" BasedOn="{StaticResource TopBarButtonStyle}">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="7"/>
+            <!-- Adjust padding to center the icon nicely -->
+            <!-- Content will be set directly on the Button instance using a Path element -->
         </Style>
 
         <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
@@ -144,8 +157,35 @@
         <Border Grid.Row="0" Background="#FF3C8DBC" Padding="8,5">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button x:Name="UndoBtn" Content="Undo" Style="{StaticResource TopBarButtonStyle}" Click="UndoBtn_Click"/>
-                    <Button x:Name="RedoBtn" Content="Redo" Style="{StaticResource TopBarButtonStyle}" Click="RedoBtn_Click"/>
+                    <!-- UNDO BUTTON - Straight Chevron Path -->
+                    <Button x:Name="UndoBtn"
+                            Style="{StaticResource IconTopBarButtonStyle}"
+                            Click="UndoBtn_Click"
+                            ToolTip="Undo (Ctrl+Z)"
+                            IsEnabled="False">
+                        <Path Data="M10,0 L0,10 L10,20"
+                              Stretch="Uniform"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="2.5" 
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              StrokeLineJoin="Round"/>
+                    </Button>
+
+                    <!-- REDO BUTTON - Straight Chevron Path -->
+                    <Button x:Name="RedoBtn"
+                            Style="{StaticResource IconTopBarButtonStyle}"
+                            Click="RedoBtn_Click"
+                            ToolTip="Redo (Ctrl+Y)"
+                            IsEnabled="False">
+                        <Path Data="M0,0 L10,10 L0,20"
+                              Stretch="Uniform"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="2.5"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              StrokeLineJoin="Round"/>
+                    </Button>
                 </StackPanel>
                 <Button x:Name="BackBtn" Content="Back to Main" HorizontalAlignment="Right" Style="{StaticResource TopBarButtonStyle}" Click="BackBtn_Click"/>
             </Grid>

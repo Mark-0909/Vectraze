@@ -9,7 +9,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="logo.jpg" />
+	  <None Remove="logo.mp4" />
+	  <None Remove="logo.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -17,7 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Resource Include="logo.jpg" />
+	  <Resource Include="logo.png" />
 	</ItemGroup>
 
 

@@ -17,6 +17,18 @@ namespace Vectraze
             InitializeComponent();
         }
 
+        // Event handler for when the logo video ends
+        private void LogoVideo_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            // To loop the video, set its position back to the beginning and play again
+            if (sender is MediaElement me)
+            {
+                me.Position = TimeSpan.Zero;
+                me.Play();
+            }
+        }
+
+
         private void HandleImageLoad(string filePath)
         {
             try

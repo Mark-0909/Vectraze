@@ -65,7 +65,7 @@
 
             <!-- Left Section: Logo and Title -->
             <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left" Width="360" Grid.ColumnSpan="2" Margin="42,0,0,0">
-                <Image Source="/logo.jpg" Width="180" Height="180" Stretch="Uniform" Margin="0,0,0,20" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                <Image Source="/logo.png" Width="180" Height="180" Stretch="Uniform" Margin="0,0,0,20" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                 <TextBlock Text="Rasterized your
 Image" 
                            FontSize="32" 
