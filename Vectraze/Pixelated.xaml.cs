@@ -19,6 +19,8 @@ namespace Vectraze
         private BitmapImage originalImage;
         private double aspectRatio;
         public int targetSize = 32;
+        private bool isPaintMode = false;
+        private Color selectedColor = Colors.Transparent;
 
         public Pixelated(BitmapImage bitmapImage)
         {
@@ -80,6 +82,7 @@ namespace Vectraze
 
             PixelCanvas.Children.Clear();
 
+            // Draw checkerboard background
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -97,6 +100,7 @@ namespace Vectraze
                 }
             }
 
+            // Draw image pixels as rectangles
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -111,13 +115,27 @@ namespace Vectraze
                     {
                         Width = cellSize,
                         Height = cellSize,
-                        Fill = new SolidColorBrush(Color.FromArgb(a, r, g, b))
+                        Fill = new SolidColorBrush(Color.FromArgb(a, r, g, b)),
+                        Tag = new Point(x, y) // Store logical pixel position
                     };
 
                     Canvas.SetLeft(rect, offsetX + x * cellSize);
                     Canvas.SetTop(rect, offsetY + y * cellSize);
+
+                    // Attach mouse event for painting
+                    rect.MouseLeftButtonDown += PixelRect_MouseLeftButtonDown;
+
                     PixelCanvas.Children.Add(rect);
                 }
+            }
+        }
+
+        private void PixelRect_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (isPaintMode && sender is Rectangle rect)
+            {
+                rect.Fill = new SolidColorBrush(selectedColor);
+                e.Handled = true;
             }
         }
 
@@ -195,8 +213,12 @@ namespace Vectraze
 
         private void PixelCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            lastDragPoint = e.GetPosition(ScrollArea);
-            PixelCanvas.CaptureMouse();
+            if (!isPaintMode)
+            {
+                lastDragPoint = e.GetPosition(ScrollArea);
+                PixelCanvas.CaptureMouse();
+            }
+            // In paint mode, handled by PixelRect_MouseLeftButtonDown
         }
 
         private void PixelCanvas_MouseMove(object sender, MouseEventArgs e)
@@ -222,14 +244,19 @@ namespace Vectraze
 
         private void ResizeBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (int.TryParse(heightTB.Text, out int newSize))
+            if (int.TryParse(widthTB.Text, out int newWidth) && int.TryParse(heightTB.Text, out int newHeight))
             {
                 PixelCanvas.Children.Clear();
-                RenderPixelatedImage(originalImage, newSize);
+
+                // Compute new aspect ratio if needed
+                aspectRatio = newWidth / (double)newHeight;
+
+                // Re-render the pixelated image with new dimensions
+                RenderPixelatedImage(originalImage, Math.Max(newWidth, newHeight));
             }
             else
             {
-                System.Windows.MessageBox.Show("Invalid height input.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Please enter valid integer values for width and height.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -271,24 +298,27 @@ namespace Vectraze
         }
 
         private void ColorPickerBtn_Click(object sender, RoutedEventArgs e)
-{
-    // Toggle visibility of the color picker
-    if (inlineColorPicker.Visibility == Visibility.Visible)
-        inlineColorPicker.Visibility = Visibility.Collapsed;
-    else
-        inlineColorPicker.Visibility = Visibility.Visible;
-}
+        {
+            // Toggle visibility of the color picker
+            if (inlineColorPicker.Visibility == Visibility.Visible)
+                inlineColorPicker.Visibility = Visibility.Collapsed;
+            else
+                inlineColorPicker.Visibility = Visibility.Visible;
+        }
 
-private void InlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-{
-    if (e.NewValue.HasValue)
-    {
-        Color selectedColor = e.NewValue.Value;
-        colorPickerBtn.Background = new SolidColorBrush(selectedColor);
-        // Optionally also update PixelCanvas background here:
-    }
-}
+        private void InlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+            {
+                selectedColor = e.NewValue.Value;
+                colorPickerBtn.Background = new SolidColorBrush(selectedColor);
+            }
+        }
 
-
+        private void PaintModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            isPaintMode = !isPaintMode;
+            PaintModeBtn.Content = isPaintMode ? "Exit Paint Mode" : "Paint Mode";
+        }
     }
 }

@@ -8,14 +8,15 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
-    <Grid x:Name="ColorDialogueBtn" Background="#FFE4E4E4">
+    <Grid Background="#FFE4E4E4">
+
+        <!-- Scrollable Canvas area for drawing -->
         <ScrollViewer x:Name="ScrollArea"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
                       Margin="20,36,400,33"
                       PreviewMouseWheel="ScrollArea_PreviewMouseWheel">
 
-            <!-- Viewbox wrapping the Canvas -->
             <Viewbox Stretch="Uniform">
                 <Canvas x:Name="PixelCanvas"
                         Width="358"
@@ -24,27 +25,36 @@
                         MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
                         MouseMove="PixelCanvas_MouseMove"
                         MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"
-                        Cursor="Hand">
+                        Cursor="Hand"
+                        SnapsToDevicePixels="True"
+                        ClipToBounds="True"
+                        FocusVisualStyle="{x:Null}"
+                        RenderOptions.BitmapScalingMode="NearestNeighbor"
+                        UseLayoutRounding="True">
                     <Canvas.LayoutTransform>
                         <ScaleTransform x:Name="canvasScaleTransform" ScaleX="1" ScaleY="1"/>
                     </Canvas.LayoutTransform>
                 </Canvas>
             </Viewbox>
-
         </ScrollViewer>
 
+        <!-- Control Buttons -->
         <Button x:Name="SaveBtn" Content="Save" HorizontalAlignment="Left" Margin="553,401,0,0" VerticalAlignment="Top" Width="108" Height="28" Click="SaveBtn_Click" />
         <Button x:Name="BackBtn" Content="Back" HorizontalAlignment="Left" Margin="772,0,0,0" VerticalAlignment="Top" Click="BackBtn_Click" />
 
+        <!-- Width and Height TextBoxes -->
         <TextBox x:Name="heightTB" HorizontalAlignment="Left" Margin="530,46,0,0" TextWrapping="Wrap" Text="32" VerticalAlignment="Top" Width="51" Height="19" TextChanged="HeightTB_TextChange"/>
         <TextBox x:Name="widthTB" HorizontalAlignment="Left" Margin="607,46,0,0" TextWrapping="Wrap" Text="32" VerticalAlignment="Top" Width="51" Height="19" TextChanged="WidthTB_TextChange"/>
         <Button x:Name="ResizeBtn" Content="Resize" HorizontalAlignment="Left" Margin="721,45,0,0" VerticalAlignment="Top" Click="ResizeBtn_Click"/>
 
-        <!-- Inline Color Picker next to the button -->
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="512,131,14,0" Height="44" >
+        <!-- Color Picker and Paint Mode Controls -->
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="526,129,0,0" Height="44" >
             <Button x:Name="colorPickerBtn" Content="Pick Color" Click="ColorPickerBtn_Click" />
-            <xctk:ColorPicker x:Name="inlineColorPicker" Width="150" Height="30" 
+            <xctk:ColorPicker x:Name="inlineColorPicker" Width="50" Height="30" 
                               Visibility="Collapsed" SelectedColorChanged="InlineColorPicker_SelectedColorChanged" />
         </StackPanel>
+
+        <Button x:Name="PaintModeBtn" Content="Paint Mode" HorizontalAlignment="Left" Margin="526,91,0,0" VerticalAlignment="Top" Width="93" Height="33" Click="PaintModeBtn_Click"/>
+
     </Grid>
 </UserControl>
