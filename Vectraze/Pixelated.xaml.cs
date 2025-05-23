@@ -24,10 +24,21 @@ namespace Vectraze
         private Color selectedColor = Colors.Transparent;
         private Color? userBackgroundColor = null;
 
-
-        private Stack<(Rectangle rect, Color oldColor, Color newColor)> undoStack = new();
-        private Stack<(Rectangle rect, Color oldColor, Color newColor)> redoStack = new();
-
+        // Snapshot-based undo/redo
+        private class PixelState
+        {
+            public Dictionary<Point, Color> Pixels { get; } = new();
+            public PixelState(IEnumerable<Rectangle> rects)
+            {
+                foreach (var rect in rects)
+                {
+                    if (rect.Tag is Point pt && rect.Fill is SolidColorBrush brush)
+                        Pixels[pt] = brush.Color;
+                }
+            }
+        }
+        private Stack<PixelState> undoStack = new();
+        private Stack<PixelState> redoStack = new();
 
         public Pixelated(BitmapImage bitmapImage)
         {
@@ -42,7 +53,6 @@ namespace Vectraze
         }
 
         private void RenderPixelatedImage(BitmapImage image, int size, bool forExport = false)
-
         {
             targetSize = size;
             int pixelWidth, pixelHeight;
@@ -115,8 +125,6 @@ namespace Vectraze
                 }
             }
 
-
-
             // Draw image pixels as rectangles
             for (int y = 0; y < pixelHeight; y++)
             {
@@ -147,6 +155,29 @@ namespace Vectraze
             }
         }
 
+        private IEnumerable<Rectangle> GetPixelRectangles()
+        {
+            // Pixel rectangles have Tag of type Point
+            return PixelCanvas.Children
+                .OfType<Rectangle>()
+                .Where(r => r.Tag is Point);
+        }
+
+        private void PushUndoState()
+        {
+            undoStack.Push(new PixelState(GetPixelRectangles()));
+            redoStack.Clear();
+        }
+
+        private void RestorePixelState(PixelState state)
+        {
+            foreach (var rect in GetPixelRectangles())
+            {
+                if (rect.Tag is Point pt && state.Pixels.TryGetValue(pt, out var color))
+                    rect.Fill = new SolidColorBrush(color);
+            }
+        }
+
         private void PixelRect_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (isPaintMode && sender is Rectangle rect)
@@ -154,17 +185,14 @@ namespace Vectraze
                 var oldBrush = rect.Fill as SolidColorBrush;
                 var oldColor = oldBrush != null ? oldBrush.Color : Colors.Transparent;
 
-                // Only record if the color is actually changing
                 if (oldColor != selectedColor)
                 {
-                    undoStack.Push((rect, oldColor, selectedColor));
-                    redoStack.Clear(); // Clear redo stack on new action
+                    PushUndoState();
                     rect.Fill = new SolidColorBrush(selectedColor);
                 }
                 e.Handled = true;
             }
         }
-
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -272,7 +300,6 @@ namespace Vectraze
                 }
             }
         }
-
 
         private void ScrollArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
@@ -408,10 +435,9 @@ namespace Vectraze
         {
             if (undoStack.Count > 0)
             {
-                var (rect, oldColor, newColor) = undoStack.Pop();
-                rect.Fill = new SolidColorBrush(oldColor);
-                // Push the same tuple to redoStack
-                redoStack.Push((rect, oldColor, newColor));
+                redoStack.Push(new PixelState(GetPixelRectangles()));
+                var prev = undoStack.Pop();
+                RestorePixelState(prev);
             }
         }
 
@@ -419,10 +445,9 @@ namespace Vectraze
         {
             if (redoStack.Count > 0)
             {
-                var (rect, oldColor, newColor) = redoStack.Pop();
-                rect.Fill = new SolidColorBrush(newColor);
-                // Push the same tuple to undoStack
-                undoStack.Push((rect, oldColor, newColor));
+                undoStack.Push(new PixelState(GetPixelRectangles()));
+                var next = redoStack.Pop();
+                RestorePixelState(next);
             }
         }
 
@@ -435,9 +460,9 @@ namespace Vectraze
                 bgInlineColorPicker.Visibility = Visibility.Visible;
         }
 
-
         private void BgInlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
+            PushUndoState();
             if (e.NewValue.HasValue && e.NewValue.Value.A > 0)
             {
                 userBackgroundColor = e.NewValue.Value;
@@ -450,15 +475,10 @@ namespace Vectraze
             }
             RenderPixelatedImage(originalImage, targetSize);
         }
-        private IEnumerable<Rectangle> GetPixelRectangles()
-        {
-            // Pixel rectangles have Tag of type Point
-            return PixelCanvas.Children
-                .OfType<Rectangle>()
-                .Where(r => r.Tag is Point);
-        }
+
         private void GrayscleBtn_Click(object sender, RoutedEventArgs e)
         {
+            PushUndoState();
             foreach (var rect in GetPixelRectangles())
             {
                 if (rect.Fill is SolidColorBrush brush)
@@ -473,9 +493,9 @@ namespace Vectraze
             }
         }
 
-
         private void SeppiaBtn_Click(object sender, RoutedEventArgs e)
         {
+            PushUndoState();
             foreach (var rect in GetPixelRectangles())
             {
                 if (rect.Fill is SolidColorBrush brush)
@@ -497,9 +517,9 @@ namespace Vectraze
             }
         }
 
-
         private void InvertBtn_Click(object sender, RoutedEventArgs e)
         {
+            PushUndoState();
             foreach (var rect in GetPixelRectangles())
             {
                 if (rect.Fill is SolidColorBrush brush)
@@ -513,9 +533,9 @@ namespace Vectraze
             }
         }
 
-
         private void TintBtn_Click(object sender, RoutedEventArgs e)
         {
+            PushUndoState();
             Color tint = Colors.Blue; // Change to any color you want
             double tintStrength = 0.3; // 0 = no tint, 1 = full tint
 
@@ -535,6 +555,5 @@ namespace Vectraze
                 }
             }
         }
-
     }
 }
