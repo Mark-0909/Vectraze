@@ -290,7 +290,7 @@ namespace Vectraze
             // Use the actual dimensions derived from pixelWidth/Height and cellSize
             if (!int.TryParse(widthTB.Text, out int pixelWidth) || !int.TryParse(heightTB.Text, out int pixelHeight))
             {
-                MessageBox.Show("Invalid canvas dimensions.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Invalid canvas dimensions.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -384,11 +384,11 @@ namespace Vectraze
                     {
                         encoder.Save(fs);
                     }
-                    MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    System.Windows.MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error saving image: {ex.Message}", "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show($"Error saving image: {ex.Message}", "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -473,7 +473,7 @@ namespace Vectraze
             }
             else
             {
-                MessageBox.Show("Please enter valid positive integer values for width and height.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("Please enter valid positive integer values for width and height.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
