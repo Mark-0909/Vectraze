@@ -190,8 +190,8 @@ namespace Vectraze
 
             PixelCanvas.LayoutTransform = originalTransform;
 
-            // Restore checkerboard rectangles
-            RenderPixelatedImage(originalImage, targetSize);
+            // Restore checkerboard rectangles only
+            RestoreCheckerboardOnly();
 
             SaveFileDialog dialog = new SaveFileDialog
             {
@@ -230,6 +230,48 @@ namespace Vectraze
             }
         }
 
+        private void RestoreCheckerboardOnly()
+        {
+            // Get current image area and cell size
+            double canvasWidth = PixelCanvas.ActualWidth;
+            double canvasHeight = PixelCanvas.ActualHeight;
+
+            int pixelWidth = int.Parse(widthTB.Text);
+            int pixelHeight = int.Parse(heightTB.Text);
+
+            double cellSizeX = canvasWidth / pixelWidth;
+            double cellSizeY = canvasHeight / pixelHeight;
+            double cellSize = Math.Floor(Math.Min(cellSizeX, cellSizeY));
+
+            double totalImageWidth = pixelWidth * cellSize;
+            double totalImageHeight = pixelHeight * cellSize;
+
+            double offsetX = Math.Floor((canvasWidth - totalImageWidth) / 2);
+            double offsetY = Math.Floor((canvasHeight - totalImageHeight) / 2);
+
+            // Only add checkerboard if no background color
+            if (!userBackgroundColor.HasValue)
+            {
+                for (int y = 0; y < pixelHeight; y++)
+                {
+                    for (int x = 0; x < pixelWidth; x++)
+                    {
+                        Rectangle bgSquare = new Rectangle
+                        {
+                            Width = cellSize,
+                            Height = cellSize,
+                            Fill = new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gray),
+                            Tag = "Checkerboard"
+                        };
+
+                        Canvas.SetLeft(bgSquare, offsetX + x * cellSize);
+                        Canvas.SetTop(bgSquare, offsetY + y * cellSize);
+                        // Insert at the bottom so it doesn't cover pixel rectangles
+                        PixelCanvas.Children.Insert(0, bgSquare);
+                    }
+                }
+            }
+        }
 
 
         private void ScrollArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
