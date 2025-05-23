@@ -53,8 +53,16 @@
             <xctk:ColorPicker x:Name="inlineColorPicker" Width="50" Height="30" 
                               Visibility="Collapsed" SelectedColorChanged="InlineColorPicker_SelectedColorChanged" />
         </StackPanel>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="526,180,0,0" Height="44">
+            <Button x:Name="bgColorPickerBtn" Content="Pick Background" Click="BgColorPickerBtn_Click" />
+            <xctk:ColorPicker x:Name="bgInlineColorPicker" Width="50" Height="30"
+                      Visibility="Collapsed" SelectedColorChanged="BgInlineColorPicker_SelectedColorChanged" />
+        </StackPanel>
 
         <Button x:Name="PaintModeBtn" Content="Paint Mode" HorizontalAlignment="Left" Margin="526,91,0,0" VerticalAlignment="Top" Width="93" Height="33" Click="PaintModeBtn_Click"/>
+        <Button x:Name="UndoBtn" Content="Undo" HorizontalAlignment="Left" Margin="20,10,0,0" VerticalAlignment="Top" Click="UndoBtn_Click"/>
+        <Button x:Name="RedoBtn" Content="Redo" HorizontalAlignment="Left" Margin="96,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.022,-0.197" Click="RedoBtn_Click"/>
+
 
     </Grid>
 </UserControl>

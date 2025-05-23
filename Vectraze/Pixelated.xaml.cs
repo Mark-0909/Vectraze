@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using Xceed.Wpf.Toolkit;
+using System.Collections.Generic;
 
 namespace Vectraze
 {
@@ -21,6 +22,12 @@ namespace Vectraze
         public int targetSize = 32;
         private bool isPaintMode = false;
         private Color selectedColor = Colors.Transparent;
+        private Color? userBackgroundColor = null;
+
+
+        private Stack<(Rectangle rect, Color oldColor, Color newColor)> undoStack = new();
+        private Stack<(Rectangle rect, Color oldColor, Color newColor)> redoStack = new();
+
 
         public Pixelated(BitmapImage bitmapImage)
         {
@@ -83,6 +90,11 @@ namespace Vectraze
             PixelCanvas.Children.Clear();
 
             // Draw checkerboard background
+            // Set the canvas background or draw checkerboard
+            // Always keep the canvas background transparent
+            PixelCanvas.Background = Brushes.Transparent;
+
+            // Draw background (checkerboard or solid color) only in the image area
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -91,7 +103,9 @@ namespace Vectraze
                     {
                         Width = cellSize,
                         Height = cellSize,
-                        Fill = new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gray)
+                        Fill = userBackgroundColor.HasValue
+                            ? new SolidColorBrush(userBackgroundColor.Value)
+                            : new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gray)
                     };
 
                     Canvas.SetLeft(bgSquare, offsetX + x * cellSize);
@@ -99,6 +113,7 @@ namespace Vectraze
                     PixelCanvas.Children.Add(bgSquare);
                 }
             }
+
 
             // Draw image pixels as rectangles
             for (int y = 0; y < pixelHeight; y++)
@@ -134,10 +149,20 @@ namespace Vectraze
         {
             if (isPaintMode && sender is Rectangle rect)
             {
-                rect.Fill = new SolidColorBrush(selectedColor);
+                var oldBrush = rect.Fill as SolidColorBrush;
+                var oldColor = oldBrush != null ? oldBrush.Color : Colors.Transparent;
+
+                // Only record if the color is actually changing
+                if (oldColor != selectedColor)
+                {
+                    undoStack.Push((rect, oldColor, selectedColor));
+                    redoStack.Clear(); // Clear redo stack on new action
+                    rect.Fill = new SolidColorBrush(selectedColor);
+                }
                 e.Handled = true;
             }
         }
+
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -320,5 +345,55 @@ namespace Vectraze
             isPaintMode = !isPaintMode;
             PaintModeBtn.Content = isPaintMode ? "Exit Paint Mode" : "Paint Mode";
         }
+
+        private void UndoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (undoStack.Count > 0)
+            {
+                var (rect, oldColor, newColor) = undoStack.Pop();
+                rect.Fill = new SolidColorBrush(oldColor);
+                // Push the same tuple to redoStack
+                redoStack.Push((rect, oldColor, newColor));
+            }
+        }
+
+        private void RedoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (redoStack.Count > 0)
+            {
+                var (rect, oldColor, newColor) = redoStack.Pop();
+                rect.Fill = new SolidColorBrush(newColor);
+                // Push the same tuple to undoStack
+                undoStack.Push((rect, oldColor, newColor));
+            }
+        }
+
+        private void BgColorPickerBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // Toggle visibility of the background color picker
+            if (bgInlineColorPicker.Visibility == Visibility.Visible)
+                bgInlineColorPicker.Visibility = Visibility.Collapsed;
+            else
+                bgInlineColorPicker.Visibility = Visibility.Visible;
+        }
+
+
+        private void BgInlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue && e.NewValue.Value.A > 0)
+            {
+                userBackgroundColor = e.NewValue.Value;
+                bgColorPickerBtn.Background = new SolidColorBrush(userBackgroundColor.Value);
+            }
+            else
+            {
+                userBackgroundColor = null;
+                bgColorPickerBtn.Background = Brushes.Transparent;
+            }
+            RenderPixelatedImage(originalImage, targetSize);
+        }
+
+
+
     }
 }
