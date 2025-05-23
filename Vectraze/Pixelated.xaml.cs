@@ -41,7 +41,8 @@ namespace Vectraze
             heightTB.TextChanged += HeightTB_TextChange;
         }
 
-        private void RenderPixelatedImage(BitmapImage image, int size)
+        private void RenderPixelatedImage(BitmapImage image, int size, bool forExport = false)
+
         {
             targetSize = size;
             int pixelWidth, pixelHeight;
@@ -89,30 +90,31 @@ namespace Vectraze
 
             PixelCanvas.Children.Clear();
 
-            // Draw checkerboard background
-            // Set the canvas background or draw checkerboard
             // Always keep the canvas background transparent
             PixelCanvas.Background = Brushes.Transparent;
 
-            // Draw background (checkerboard or solid color) only in the image area
-            for (int y = 0; y < pixelHeight; y++)
+            if (!userBackgroundColor.HasValue && !forExport)
             {
-                for (int x = 0; x < pixelWidth; x++)
+                // Draw checkerboard
+                for (int y = 0; y < pixelHeight; y++)
                 {
-                    Rectangle bgSquare = new Rectangle
+                    for (int x = 0; x < pixelWidth; x++)
                     {
-                        Width = cellSize,
-                        Height = cellSize,
-                        Fill = userBackgroundColor.HasValue
-                            ? new SolidColorBrush(userBackgroundColor.Value)
-                            : new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gray)
-                    };
+                        Rectangle bgSquare = new Rectangle
+                        {
+                            Width = cellSize,
+                            Height = cellSize,
+                            Fill = new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gray),
+                            Tag = "Checkerboard"
+                        };
 
-                    Canvas.SetLeft(bgSquare, offsetX + x * cellSize);
-                    Canvas.SetTop(bgSquare, offsetY + y * cellSize);
-                    PixelCanvas.Children.Add(bgSquare);
+                        Canvas.SetLeft(bgSquare, offsetX + x * cellSize);
+                        Canvas.SetTop(bgSquare, offsetY + y * cellSize);
+                        PixelCanvas.Children.Add(bgSquare);
+                    }
                 }
             }
+
 
 
             // Draw image pixels as rectangles
@@ -166,6 +168,15 @@ namespace Vectraze
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
+            // Hide checkerboard rectangles for export
+            var checkerboardRects = PixelCanvas.Children
+                .OfType<Rectangle>()
+                .Where(r => r.Tag as string == "Checkerboard")
+                .ToList();
+
+            foreach (var rect in checkerboardRects)
+                PixelCanvas.Children.Remove(rect);
+
             var originalTransform = PixelCanvas.LayoutTransform;
             PixelCanvas.LayoutTransform = Transform.Identity;
 
@@ -178,6 +189,9 @@ namespace Vectraze
             rtb.Render(PixelCanvas);
 
             PixelCanvas.LayoutTransform = originalTransform;
+
+            // Restore checkerboard rectangles
+            RenderPixelatedImage(originalImage, targetSize);
 
             SaveFileDialog dialog = new SaveFileDialog
             {
@@ -215,6 +229,8 @@ namespace Vectraze
                 System.Windows.MessageBox.Show("Image saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
+
 
         private void ScrollArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
