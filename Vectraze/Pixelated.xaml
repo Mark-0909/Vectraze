@@ -231,32 +231,14 @@
                                 </Border>
                             </Popup>
 
-                            <TextBlock Text="Background Color:" Margin="0,8,0,2"/>
-                            <StackPanel Orientation="Horizontal">
-                                <Button x:Name="bgColorPickerBtn" Content="Pick" Style="{StaticResource ToolButtonStyle}" Click="BgColorPickerBtn_Click" MinWidth="60"/>
-                                <Rectangle x:Name="SelectedBgColorPreview" Width="30" Height="30" Stroke="DimGray" StrokeThickness="1" Fill="Transparent" Margin="8,0,0,0">
-                                    <Rectangle.OpacityMask>
-                                        <VisualBrush>
-                                            <VisualBrush.Visual>
-                                                <Grid Width="10" Height="10">
-                                                    <Rectangle Fill="White"/>
-                                                    <Path Data="M0,0 L5,0 L5,5 L0,5Z M5,5 L10,5 L10,10 L5,10Z" Fill="LightGray"/>
-                                                </Grid>
-                                            </VisualBrush.Visual>
-                                        </VisualBrush>
-                                    </Rectangle.OpacityMask>
-                                </Rectangle>
-                            </StackPanel>
-                            <Popup x:Name="BgColorPickerPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=bgColorPickerBtn}" StaysOpen="False">
-                                <Border Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="1" Padding="5">
-                                    <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="2" Color="#BBBBBB" Opacity="0.6" BlurRadius="4"/>
-                                    </Border.Effect>
-                                    <xctk:ColorPicker x:Name="bgInlineColorPicker" SelectedColorChanged="BgInlineColorPicker_SelectedColorChanged" DisplayColorAndName="True" ShowAvailableColors="True" ShowStandardColors="True"/>
-                                </Border>
-                            </Popup>
-                        </StackPanel>
-                    </GroupBox>
+        <Button x:Name="PaintModeBtn" Content="Paint Mode" HorizontalAlignment="Left" Margin="526,91,0,0" VerticalAlignment="Top" Width="93" Height="33" Click="PaintModeBtn_Click"/>
+        <Button x:Name="UndoBtn" Content="Undo" HorizontalAlignment="Left" Margin="20,10,0,0" VerticalAlignment="Top" Click="UndoBtn_Click"/>
+        <Button x:Name="RedoBtn" Content="Redo" HorizontalAlignment="Left" Margin="96,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.022,-0.197" Click="RedoBtn_Click"/>
+        <Button x:Name="GrayscleBtn" Content="Grayscale" HorizontalAlignment="Left" Margin="526,251,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="GrayscleBtn_Click" />
+        <Button x:Name="SeppiaBtn" Content="Sepia" HorizontalAlignment="Left" Margin="526,293,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="SeppiaBtn_Click" />
+        <Button x:Name="InvertBtn" Content="Invert" HorizontalAlignment="Left" Margin="526,326,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="InvertBtn_Click" />
+        <Button x:Name="TintBtn" Content="Tint" HorizontalAlignment="Left" Margin="526,368,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="TintBtn_Click" />
+        <Button x:Name="SaturateBtn" Content="Saturate" HorizontalAlignment="Left" Margin="626,363,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="SaturateBtn_Click" />
 
                     <GroupBox Header="Image Effects" Style="{StaticResource CustomGroupBoxStyle}">
                         <StackPanel>
