@@ -62,6 +62,10 @@
         <Button x:Name="PaintModeBtn" Content="Paint Mode" HorizontalAlignment="Left" Margin="526,91,0,0" VerticalAlignment="Top" Width="93" Height="33" Click="PaintModeBtn_Click"/>
         <Button x:Name="UndoBtn" Content="Undo" HorizontalAlignment="Left" Margin="20,10,0,0" VerticalAlignment="Top" Click="UndoBtn_Click"/>
         <Button x:Name="RedoBtn" Content="Redo" HorizontalAlignment="Left" Margin="96,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.022,-0.197" Click="RedoBtn_Click"/>
+        <Button x:Name="GrayscleBtn" Content="Grayscale" HorizontalAlignment="Left" Margin="526,251,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="GrayscleBtn_Click" />
+        <Button x:Name="SeppiaBtn" Content="Sepia" HorizontalAlignment="Left" Margin="526,293,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="SeppiaBtn_Click" />
+        <Button x:Name="InvertBtn" Content="Invert" HorizontalAlignment="Left" Margin="526,326,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="InvertBtn_Click" />
+        <Button x:Name="TintBtn" Content="Tint" HorizontalAlignment="Left" Margin="526,368,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="TintBtn_Click" />
 
 
     </Grid>

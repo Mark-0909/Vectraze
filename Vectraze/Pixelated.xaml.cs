@@ -450,8 +450,91 @@ namespace Vectraze
             }
             RenderPixelatedImage(originalImage, targetSize);
         }
+        private IEnumerable<Rectangle> GetPixelRectangles()
+        {
+            // Pixel rectangles have Tag of type Point
+            return PixelCanvas.Children
+                .OfType<Rectangle>()
+                .Where(r => r.Tag is Point);
+        }
+        private void GrayscleBtn_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var rect in GetPixelRectangles())
+            {
+                if (rect.Fill is SolidColorBrush brush)
+                {
+                    var color = brush.Color;
+                    if (color.A == 0) continue; // Skip transparent
+
+                    byte gray = (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
+                    var grayColor = Color.FromArgb(color.A, gray, gray, gray);
+                    rect.Fill = new SolidColorBrush(grayColor);
+                }
+            }
+        }
 
 
+        private void SeppiaBtn_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var rect in GetPixelRectangles())
+            {
+                if (rect.Fill is SolidColorBrush brush)
+                {
+                    var color = brush.Color;
+                    if (color.A == 0) continue; // Skip transparent
+
+                    int tr = (int)(0.393 * color.R + 0.769 * color.G + 0.189 * color.B);
+                    int tg = (int)(0.349 * color.R + 0.686 * color.G + 0.168 * color.B);
+                    int tb = (int)(0.272 * color.R + 0.534 * color.G + 0.131 * color.B);
+
+                    byte r = (byte)Math.Min(255, tr);
+                    byte g = (byte)Math.Min(255, tg);
+                    byte b = (byte)Math.Min(255, tb);
+
+                    var sepiaColor = Color.FromArgb(color.A, r, g, b);
+                    rect.Fill = new SolidColorBrush(sepiaColor);
+                }
+            }
+        }
+
+
+        private void InvertBtn_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var rect in GetPixelRectangles())
+            {
+                if (rect.Fill is SolidColorBrush brush)
+                {
+                    var color = brush.Color;
+                    if (color.A == 0) continue; // Skip transparent
+
+                    var invertedColor = Color.FromArgb(color.A, (byte)(255 - color.R), (byte)(255 - color.G), (byte)(255 - color.B));
+                    rect.Fill = new SolidColorBrush(invertedColor);
+                }
+            }
+        }
+
+
+        private void TintBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Color tint = Colors.Blue; // Change to any color you want
+            double tintStrength = 0.3; // 0 = no tint, 1 = full tint
+
+            foreach (var rect in GetPixelRectangles())
+            {
+                if (rect.Fill is SolidColorBrush brush)
+                {
+                    var color = brush.Color;
+                    if (color.A == 0) continue; // Skip transparent
+
+                    byte r = (byte)(color.R * (1 - tintStrength) + tint.R * tintStrength);
+                    byte g = (byte)(color.G * (1 - tintStrength) + tint.G * tintStrength);
+                    byte b = (byte)(color.B * (1 - tintStrength) + tint.B * tintStrength);
+
+                    var tintedColor = Color.FromArgb(color.A, r, g, b);
+                    rect.Fill = new SolidColorBrush(tintedColor);
+                }
+            }
+        }
 
     }
 }
