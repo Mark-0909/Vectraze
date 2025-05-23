@@ -9,7 +9,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="logo.jpg" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <PackageReference Include="Extended.Wpf.Toolkit" Version="4.7.25104.5739" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="logo.jpg" />
 	</ItemGroup>
 
 

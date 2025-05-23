@@ -1,72 +1,275 @@
 ﻿<UserControl x:Class="Vectraze.Pixelated"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:local="clr-namespace:Vectraze"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900" Background="#FFE0E0E0">
 
-    <Grid Background="#FFE4E4E4">
+    <UserControl.Resources>
+        <!-- General Button Style -->
+        <Style x:Key="BaseButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#FFABADB3"/>
+            <Setter Property="Background" Value="#FFF0F0F0"/>
+            <Setter Property="Foreground" Value="#FF202020"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FFE0E0E0"/>
+                                <Setter Property="BorderBrush" Value="#FF7EB4EA"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FFC0C0C0"/>
+                                <Setter Property="BorderBrush" Value="#FF569DE5"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        <!-- Scrollable Canvas area for drawing -->
-        <ScrollViewer x:Name="ScrollArea"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Auto"
-                      Margin="20,36,400,33"
-                      PreviewMouseWheel="ScrollArea_PreviewMouseWheel">
+        <Style x:Key="PrimaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="#FF3C8DBC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF3C8DBC"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF3277A1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FF2A6387"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#FFA0A0A0"/>
+                                <Setter Property="Foreground" Value="#FFE0E0E0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-            <Viewbox Stretch="Uniform">
-                <Canvas x:Name="PixelCanvas"
-                        Width="358"
-                        Height="366"
-                        Background="Transparent"
-                        MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
-                        MouseMove="PixelCanvas_MouseMove"
-                        MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"
-                        Cursor="Hand"
-                        SnapsToDevicePixels="True"
-                        ClipToBounds="True"
-                        FocusVisualStyle="{x:Null}"
-                        RenderOptions.BitmapScalingMode="NearestNeighbor"
-                        UseLayoutRounding="True">
-                    <Canvas.LayoutTransform>
-                        <ScaleTransform x:Name="canvasScaleTransform" ScaleX="1" ScaleY="1"/>
-                    </Canvas.LayoutTransform>
-                </Canvas>
-            </Viewbox>
-        </ScrollViewer>
+        <Style x:Key="ToolButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}"/>
 
-        <!-- Control Buttons -->
-        <Button x:Name="SaveBtn" Content="Save" HorizontalAlignment="Left" Margin="553,401,0,0" VerticalAlignment="Top" Width="108" Height="28" Click="SaveBtn_Click" />
-        <Button x:Name="BackBtn" Content="Back" HorizontalAlignment="Left" Margin="772,0,0,0" VerticalAlignment="Top" Click="BackBtn_Click" />
+        <Style x:Key="TopBarButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#66FFFFFF"/>
+                                <!-- Semi-transparent white -->
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#99FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        <!-- Width and Height TextBoxes -->
-        <TextBox x:Name="heightTB" HorizontalAlignment="Left" Margin="530,46,0,0" TextWrapping="Wrap" Text="32" VerticalAlignment="Top" Width="51" Height="19" TextChanged="HeightTB_TextChange"/>
-        <TextBox x:Name="widthTB" HorizontalAlignment="Left" Margin="607,46,0,0" TextWrapping="Wrap" Text="32" VerticalAlignment="Top" Width="51" Height="19" TextChanged="WidthTB_TextChange"/>
-        <Button x:Name="ResizeBtn" Content="Resize" HorizontalAlignment="Left" Margin="721,45,0,0" VerticalAlignment="Top" Click="ResizeBtn_Click"/>
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="BorderBrush" Value="#FFABADB3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
 
-        <!-- Color Picker and Paint Mode Controls -->
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="526,129,0,0" Height="44" >
-            <Button x:Name="colorPickerBtn" Content="Pick Color" Click="ColorPickerBtn_Click" />
-            <xctk:ColorPicker x:Name="inlineColorPicker" Width="50" Height="30" 
-                              Visibility="Collapsed" SelectedColorChanged="InlineColorPicker_SelectedColorChanged" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="526,180,0,0" Height="44">
-            <Button x:Name="bgColorPickerBtn" Content="Pick Background" Click="BgColorPickerBtn_Click" />
-            <xctk:ColorPicker x:Name="bgInlineColorPicker" Width="50" Height="30"
-                      Visibility="Collapsed" SelectedColorChanged="BgInlineColorPicker_SelectedColorChanged" />
-        </StackPanel>
+        <Style x:Key="CustomGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="BorderBrush" Value="#FFC0C0C0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="14" Foreground="#FF333333"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
-        <Button x:Name="PaintModeBtn" Content="Paint Mode" HorizontalAlignment="Left" Margin="526,91,0,0" VerticalAlignment="Top" Width="93" Height="33" Click="PaintModeBtn_Click"/>
-        <Button x:Name="UndoBtn" Content="Undo" HorizontalAlignment="Left" Margin="20,10,0,0" VerticalAlignment="Top" Click="UndoBtn_Click"/>
-        <Button x:Name="RedoBtn" Content="Redo" HorizontalAlignment="Left" Margin="96,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.022,-0.197" Click="RedoBtn_Click"/>
-        <Button x:Name="GrayscleBtn" Content="Grayscale" HorizontalAlignment="Left" Margin="526,251,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="GrayscleBtn_Click" />
-        <Button x:Name="SeppiaBtn" Content="Sepia" HorizontalAlignment="Left" Margin="526,293,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="SeppiaBtn_Click" />
-        <Button x:Name="InvertBtn" Content="Invert" HorizontalAlignment="Left" Margin="526,326,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="InvertBtn_Click" />
-        <Button x:Name="TintBtn" Content="Tint" HorizontalAlignment="Left" Margin="526,368,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="TintBtn_Click" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Top bar -->
+            <RowDefinition Height="*"/>
+            <!-- Main content -->
+        </Grid.RowDefinitions>
 
+        <!-- Top Bar -->
+        <Border Grid.Row="0" Background="#FF3C8DBC" Padding="8,5">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button x:Name="UndoBtn" Content="Undo" Style="{StaticResource TopBarButtonStyle}" Click="UndoBtn_Click"/>
+                    <Button x:Name="RedoBtn" Content="Redo" Style="{StaticResource TopBarButtonStyle}" Click="RedoBtn_Click"/>
+                </StackPanel>
+                <Button x:Name="BackBtn" Content="Back to Main" HorizontalAlignment="Right" Style="{StaticResource TopBarButtonStyle}" Click="BackBtn_Click"/>
+            </Grid>
+        </Border>
 
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*" MinWidth="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Canvas Area -->
+            <Border Grid.Column="0" BorderBrush="#FFB0B0B0" BorderThickness="1" Background="White" CornerRadius="3" Padding="5">
+                <ScrollViewer x:Name="ScrollArea"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              PreviewMouseWheel="ScrollArea_PreviewMouseWheel">
+                    <Viewbox Stretch="Uniform">
+                        <Canvas x:Name="PixelCanvas"
+                                Width="512" Height="512" 
+                                Background="Transparent"
+                                MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
+                                MouseMove="PixelCanvas_MouseMove"
+                                MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"
+                                Cursor="Cross"
+                                SnapsToDevicePixels="True"
+                                ClipToBounds="True"
+                                FocusVisualStyle="{x:Null}"
+                                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                UseLayoutRounding="True">
+                            <Canvas.LayoutTransform>
+                                <ScaleTransform x:Name="canvasScaleTransform" ScaleX="1" ScaleY="1"/>
+                            </Canvas.LayoutTransform>
+                        </Canvas>
+                    </Viewbox>
+                </ScrollViewer>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" ShowsPreview="True"/>
+
+            <!-- Controls Panel -->
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Padding="10,0,0,0">
+                <StackPanel Orientation="Vertical">
+
+                    <GroupBox Header="Canvas Size" Style="{StaticResource CustomGroupBoxStyle}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Column="0" Text="Width:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBox Grid.Column="1" x:Name="widthTB" Text="32" Style="{StaticResource InputTextBoxStyle}" TextChanged="WidthTB_TextChange"/>
+                                <TextBlock Grid.Column="2" Text="Height:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                                <TextBox Grid.Column="3" x:Name="heightTB" Text="32" Style="{StaticResource InputTextBoxStyle}" TextChanged="HeightTB_TextChange"/>
+                            </Grid>
+                            <Button x:Name="ResizeBtn" Content="Apply Size" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Margin="0,8,0,0" Click="ResizeBtn_Click"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Drawing Tools" Style="{StaticResource CustomGroupBoxStyle}">
+                        <StackPanel>
+                            <Button x:Name="PaintModeBtn" Content="Paint Mode" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="PaintModeBtn_Click"/>
+
+                            <TextBlock Text="Foreground Color:" Margin="0,10,0,2"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <Button x:Name="colorPickerBtn" Content="Pick" Style="{StaticResource ToolButtonStyle}" Click="ColorPickerBtn_Click" MinWidth="60"/>
+                                <Rectangle x:Name="SelectedColorPreview" Width="30" Height="30" Stroke="DimGray" StrokeThickness="1" Fill="Black" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <Popup x:Name="ColorPickerPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=colorPickerBtn}" StaysOpen="False">
+                                <Border Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="1" Padding="5">
+                                    <Border.Effect>
+                                        <DropShadowEffect ShadowDepth="2" Color="#BBBBBB" Opacity="0.6" BlurRadius="4"/>
+                                    </Border.Effect>
+                                    <xctk:ColorPicker x:Name="inlineColorPicker" SelectedColorChanged="InlineColorPicker_SelectedColorChanged" DisplayColorAndName="True" ShowAvailableColors="True" ShowStandardColors="True"/>
+                                </Border>
+                            </Popup>
+
+                            <TextBlock Text="Background Color:" Margin="0,8,0,2"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="bgColorPickerBtn" Content="Pick" Style="{StaticResource ToolButtonStyle}" Click="BgColorPickerBtn_Click" MinWidth="60"/>
+                                <Rectangle x:Name="SelectedBgColorPreview" Width="30" Height="30" Stroke="DimGray" StrokeThickness="1" Fill="Transparent" Margin="8,0,0,0">
+                                    <Rectangle.OpacityMask>
+                                        <VisualBrush>
+                                            <VisualBrush.Visual>
+                                                <Grid Width="10" Height="10">
+                                                    <Rectangle Fill="White"/>
+                                                    <Path Data="M0,0 L5,0 L5,5 L0,5Z M5,5 L10,5 L10,10 L5,10Z" Fill="LightGray"/>
+                                                </Grid>
+                                            </VisualBrush.Visual>
+                                        </VisualBrush>
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </StackPanel>
+                            <Popup x:Name="BgColorPickerPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=bgColorPickerBtn}" StaysOpen="False">
+                                <Border Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="1" Padding="5">
+                                    <Border.Effect>
+                                        <DropShadowEffect ShadowDepth="2" Color="#BBBBBB" Opacity="0.6" BlurRadius="4"/>
+                                    </Border.Effect>
+                                    <xctk:ColorPicker x:Name="bgInlineColorPicker" SelectedColorChanged="BgInlineColorPicker_SelectedColorChanged" DisplayColorAndName="True" ShowAvailableColors="True" ShowStandardColors="True"/>
+                                </Border>
+                            </Popup>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Image Effects" Style="{StaticResource CustomGroupBoxStyle}">
+                        <StackPanel>
+                            <Button x:Name="GrayscleBtn" Content="Grayscale" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="GrayscleBtn_Click"/>
+                            <Button x:Name="SeppiaBtn" Content="Sepia" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="SeppiaBtn_Click"/>
+                            <Button x:Name="InvertBtn" Content="Invert" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="InvertBtn_Click"/>
+                            <Button x:Name="TintBtn" Content="Tint" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="TintBtn_Click"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <Button x:Name="SaveBtn" Content="Save Image" Style="{StaticResource PrimaryActionButtonStyle}" HorizontalAlignment="Stretch" Margin="0,15,0,0" Click="SaveBtn_Click"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </UserControl>

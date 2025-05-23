@@ -1,20 +1,15 @@
 ﻿using Microsoft.Win32;
-using System.Text;
+using System; // Added for Uri
+using System.Linq; // Added for Contains
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
+using System.Windows.Input; // Added for MouseButtonEventArgs
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace Vectraze
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -22,26 +17,54 @@ namespace Vectraze
             InitializeComponent();
         }
 
-        private void AddImageBtn_Click(object sender, RoutedEventArgs e)
+        private void HandleImageLoad(string filePath)
+        {
+            try
+            {
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(filePath, UriKind.Absolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad; // Cache immediately
+                bitmap.EndInit();
+                bitmap.Freeze(); // Freeze for performance and cross-thread access if needed
+
+                ImagePreview.Source = bitmap;
+                ImagePreview.Visibility = Visibility.Visible;
+                PlaceholderContent.Visibility = Visibility.Collapsed;
+                RasterizedBtn.IsEnabled = true; // Enable button after image is loaded
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading image: {ex.Message}", "Image Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ClearImagePreview();
+            }
+        }
+
+        private void ClearImagePreview()
+        {
+            ImagePreview.Source = null;
+            ImagePreview.Visibility = Visibility.Collapsed;
+            PlaceholderContent.Visibility = Visibility.Visible;
+            RasterizedBtn.IsEnabled = false;
+        }
+
+        // This method replaces the old AddImageBtn_Click
+        private void OpenImageDialog()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = "Open Image File";
-            openFileDialog.Filter = "Image Files|*.svg;*.png;*.jpg;*.jpeg;*.bmp;*.gif";
+            openFileDialog.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.svg"; // Added SVG as per original code
 
             if (openFileDialog.ShowDialog() == true)
             {
-                string filePath = openFileDialog.FileName;
-
-                // Store image
-                BitmapImage bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri(filePath);
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-
-                // Image preview
-                ImagePreview.Source = bitmap;
+                HandleImageLoad(openFileDialog.FileName);
             }
+        }
+
+        // Event handler for clicking the drop border
+        private void DropBorder_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            OpenImageDialog();
         }
 
         private void DropBorder_DragEnter(object sender, DragEventArgs e)
@@ -54,6 +77,7 @@ namespace Vectraze
             {
                 e.Effects = DragDropEffects.None;
             }
+            e.Handled = true;
         }
 
         private void DropBorder_Drop(object sender, DragEventArgs e)
@@ -65,32 +89,41 @@ namespace Vectraze
                 if (files.Length > 0)
                 {
                     string filePath = files[0];
-
-                    string extension = System.IO.Path.GetExtension(filePath).ToLower();
-                    string[] allowedExtensions = { ".png", ".jpg", ".jpeg", ".bmp", ".gif" };
+                    // Updated extension check to be case-insensitive and match dialog filter
+                    string extension = System.IO.Path.GetExtension(filePath).ToLowerInvariant();
+                    string[] allowedExtensions = { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg" };
 
                     if (allowedExtensions.Contains(extension))
                     {
-                        BitmapImage bitmap = new BitmapImage();
-                        bitmap.BeginInit();
-                        bitmap.UriSource = new Uri(filePath);
-                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.EndInit();
-
-                        ImagePreview.Source = bitmap;
+                        HandleImageLoad(filePath);
                     }
                     else
                     {
-                        MessageBox.Show("Unsupported file format. Please drop an image.");
+                        MessageBox.Show("Unsupported file format. Please drop a PNG, JPG, JPEG, BMP, GIF, or SVG file.", "Unsupported File", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                 }
             }
+            e.Handled = true;
         }
 
         private void RasterizedBtn_Click(object sender, RoutedEventArgs e)
         {
-            Pixelated PixelUserControl = new Pixelated((BitmapImage)ImagePreview.Source);
-            this.Content = PixelUserControl;
+            if (ImagePreview.Source is BitmapImage bitmapImage)
+            {
+                Pixelated PixelUserControl = new Pixelated(bitmapImage);
+                this.Content = PixelUserControl;
+            }
+            else
+            {
+                MessageBox.Show("Please load an image first.", "No Image", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
+
+        // Example method for how AddImageBtn_Click would be if it were still a button
+        // This is effectively replaced by DropBorder_MouseLeftButtonUp calling OpenImageDialog()
+        // public void AddImageBtn_Click(object sender, RoutedEventArgs e)
+        // {
+        //     OpenImageDialog();
+        // }
     }
 }

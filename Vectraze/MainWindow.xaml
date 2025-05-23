@@ -5,19 +5,133 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Vectraze"
         mc:Ignorable="d"
-        Title="MainWindow" Height="519" Width="822" Background="#FFCECECE" WindowStartupLocation="CenterScreen">
+        Title="Vectraze Image Rasterizer" Height="550" Width="900" Background="White" WindowStartupLocation="CenterScreen">
 
-    <Grid Margin="296,0,0,0">
-        <Border x:Name="DropBorder" BorderBrush="Black" BorderThickness="1" Background="#FFCECECE" Margin="94,96,78,72" AllowDrop="True" Drop="DropBorder_Drop" DragEnter="DropBorder_DragEnter">
+    <Window.Resources>
+        <!-- Style for the Rasterized Button -->
+        <Style x:Key="RasterizedButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3C8DBC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3277A1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#2A6387"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#A0A0A0"/>
+                                <Setter Property="Foreground" Value="#E0E0E0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-            <Button x:Name="AddImageBtn" Content="Add Image" Margin="123,110,123,119" Click="AddImageBtn_Click"/>
-        </Border>
+        <!-- Drop Shadow Effect -->
+        <DropShadowEffect x:Key="SubtleDropShadow" Color="#AAA" ShadowDepth="1" BlurRadius="8" Opacity="0.3"/>
+    </Window.Resources>
 
-        <Image x:Name="ImagePreview" HorizontalAlignment="Left" Height="304" Margin="107,112,0,0" VerticalAlignment="Top" Width="325"/>
-        <Button x:Name="RasterizedBtn" Content="Rasterized" HorizontalAlignment="Center" Margin="0,446,0,0" VerticalAlignment="Top" Width="130" Height="38" Click="RasterizedBtn_Click"/>
+    <Grid>
+        <!-- Background Pattern Elements -->
+        <Grid Panel.ZIndex="-1" Opacity="0.9">
+            <Rectangle Fill="#A0D9F8" HorizontalAlignment="Left" VerticalAlignment="Top" Width="300" Height="250" Margin="-60,-50,0,0"/>
+            <Rectangle Fill="#CAE9F9" HorizontalAlignment="Right" VerticalAlignment="Top" Width="220" Height="180" Margin="0,-40,-50,0"/>
+            <Rectangle Fill="#CAE9F9" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="220" Height="180" Margin="-50,0,0,-60"/>
+            <Rectangle Fill="#A0D9F8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="300" Height="250" Margin="0,0,-60,-70"/>
+        </Grid>
 
+        <!-- Main Content Layout -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.8*" MinWidth="300"/>
+                <ColumnDefinition Width="1.2*" MinWidth="400"/>
+            </Grid.ColumnDefinitions>
 
+            <!-- Left Section: Logo and Title -->
+            <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left" Width="360" Grid.ColumnSpan="2" Margin="42,0,0,0">
+                <Image Source="/logo.jpg" Width="180" Height="180" Stretch="Uniform" Margin="0,0,0,20" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                <TextBlock Text="Rasterized your
+Image" 
+                           FontSize="32" 
+                           FontWeight="Bold" 
+                           Foreground="#4A4A4A" 
+                           TextAlignment="Center"
+                           LineHeight="36"/>
+            </StackPanel>
+
+            <!-- Right Section: Drop Area and Button -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+                <Border x:Name="DropBorder" 
+                        Width="320" Height="320" 
+                        Background="#FDFDFD" 
+                        BorderBrush="#D0D0D0" 
+                        BorderThickness="1.5" 
+                        CornerRadius="20" 
+                        Effect="{StaticResource SubtleDropShadow}"
+                        AllowDrop="True" 
+                        Drop="DropBorder_Drop" 
+                        DragEnter="DropBorder_DragEnter"
+                        MouseLeftButtonUp="DropBorder_MouseLeftButtonUp"
+                        Cursor="Hand">
+                    <Grid>
+                        <!-- Placeholder Content (Icon and Text) -->
+                        <StackPanel x:Name="PlaceholderContent" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <!-- Custom Placeholder Icon -->
+                            <Grid Width="90" Height="90" Margin="0,0,0,15">
+                                <!-- Back Photo Shape -->
+                                <Border CornerRadius="8" Background="#E0E0E0" Margin="8,8,0,0"/>
+                                <!-- Front Photo Shape -->
+                                <Border CornerRadius="8" Background="#D0D0D0" BorderBrush="#BDBDBD" BorderThickness="1.5" Margin="0,0,8,8">
+                                    <Grid Margin="5">
+                                        <Path Data="M6,20 L12,14 L17,20 Z M15,20 L21,14 L26,20 Z" 
+                                              Fill="#B0B0B0" 
+                                              Stretch="Uniform" 
+                                              VerticalAlignment="Bottom" 
+                                              HorizontalAlignment="Center"
+                                              Width="28" Height="10" Margin="0,0,0,4"/>
+                                        <Ellipse Fill="#B0B0B0" Width="9" Height="9" 
+                                                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,6,0,0"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                            <TextBlock Text="Add or Drop
+Image" 
+                                       FontSize="18" 
+                                       Foreground="#888888" 
+                                       TextAlignment="Center"
+                                       LineHeight="22"/>
+                        </StackPanel>
+
+                        <!-- Image Preview Area -->
+                        <Image x:Name="ImagePreview" Stretch="Uniform" Margin="5" Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+
+                <Button x:Name="RasterizedBtn" 
+                        Content="Rasterized" 
+                        Width="200" Height="45" 
+                        Margin="0,30,0,0"
+                        Style="{StaticResource RasterizedButtonStyle}"
+                        Click="RasterizedBtn_Click"
+                        IsEnabled="False"/>
+                <!-- Initially disabled until image is loaded -->
+            </StackPanel>
+        </Grid>
     </Grid>
-
-
 </Window>
