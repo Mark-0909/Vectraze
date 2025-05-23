@@ -66,6 +66,7 @@
         <Button x:Name="SeppiaBtn" Content="Sepia" HorizontalAlignment="Left" Margin="526,293,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="SeppiaBtn_Click" />
         <Button x:Name="InvertBtn" Content="Invert" HorizontalAlignment="Left" Margin="526,326,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="InvertBtn_Click" />
         <Button x:Name="TintBtn" Content="Tint" HorizontalAlignment="Left" Margin="526,368,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="TintBtn_Click" />
+        <Button x:Name="SaturateBtn" Content="Saturate" HorizontalAlignment="Left" Margin="626,363,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="SaturateBtn_Click" />
 
 
     </Grid>
