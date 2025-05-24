@@ -304,9 +304,10 @@
                             <Button x:Name="SeppiaBtn" Content="Sepia" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="SeppiaBtn_Click"/>
                             <Button x:Name="InvertBtn" Content="Invert" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="InvertBtn_Click"/>
                             <Button x:Name="TintBtn" Content="Tint" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="TintBtn_Click"/>
+                            <Button x:Name="SaturateBtn" Content="Saturate" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="SaturateBtn_Click"/>
                         </StackPanel>
                     </GroupBox>
-                    <Button x:Name="SaturateBtn" Content="Saturate" RenderTransformOrigin="0.5,0.5" Width="74" Height="28" Click="SaturateBtn_Click" />
+                    
                     <Button x:Name="SaveBtn" Content="Save Image" Style="{StaticResource PrimaryActionButtonStyle}" HorizontalAlignment="Stretch" Margin="0,15,0,0" Click="SaveBtn_Click"/>
                 </StackPanel>
             </ScrollViewer>
