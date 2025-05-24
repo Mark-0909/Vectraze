@@ -674,5 +674,86 @@ namespace Vectraze
                 rect.Fill = new SolidColorBrush(Color.FromArgb(color.A, r, g, b));
             });
         }
+
+        private void SaturateBtn_Click(object sender, RoutedEventArgs e)
+        {
+            PushUndoState();
+            double saturateAmount = 0.3; // Increase by 30% (can adjust)
+
+            foreach (var rect in GetPixelRectangles())
+            {
+                if (rect.Fill is SolidColorBrush brush)
+                {
+                    var color = brush.Color;
+                    if (color.A == 0) continue; // Skip transparent
+
+                    ColorToHsl(color, out double h, out double s, out double l);
+                    s = Math.Min(1.0, s + saturateAmount * (1.0 - s)); // Increase saturation, clamp to 1.0
+                    var saturatedColor = HslToColor(h, s, l, color.A);
+                    rect.Fill = new SolidColorBrush(saturatedColor);
+                }
+            }
+        }
+
+
+        private static void ColorToHsl(Color color, out double h, out double s, out double l)
+        {
+            double r = color.R / 255.0;
+            double g = color.G / 255.0;
+            double b = color.B / 255.0;
+
+            double max = Math.Max(r, Math.Max(g, b));
+            double min = Math.Min(r, Math.Min(g, b));
+            h = s = l = (max + min) / 2.0;
+
+            if (max == min)
+            {
+                h = s = 0; // achromatic
+            }
+            else
+            {
+                double d = max - min;
+                s = l > 0.5 ? d / (2.0 - max - min) : d / (max + min);
+
+                if (max == r)
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                else if (max == g)
+                    h = (b - r) / d + 2;
+                else
+                    h = (r - g) / d + 4;
+
+                h /= 6.0;
+            }
+        }
+
+        private static Color HslToColor(double h, double s, double l, byte alpha)
+        {
+            double r, g, b;
+
+            if (s == 0)
+            {
+                r = g = b = l; // achromatic
+            }
+            else
+            {
+                double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                double p = 2 * l - q;
+                r = HueToRgb(p, q, h + 1.0 / 3.0);
+                g = HueToRgb(p, q, h);
+                b = HueToRgb(p, q, h - 1.0 / 3.0);
+            }
+
+            return Color.FromArgb(alpha, (byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+        }
+
+        private static double HueToRgb(double p, double q, double t)
+        {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1.0 / 6.0) return p + (q - p) * 6 * t;
+            if (t < 1.0 / 2.0) return q;
+            if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6;
+            return p;
+        }
     }
 }
