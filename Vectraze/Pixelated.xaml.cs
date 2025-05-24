@@ -632,7 +632,7 @@ namespace Vectraze
                 userBackgroundColor = null; // No background color / transparent
             }
             UpdateBgColorPreview();
-            RenderPixelatedImage(originalImage, targetSize); // Re-render with new background
+            RedrawBackgroundOnly();
             // BgColorPickerPopup.IsOpen = false; // Optionally close
         }
 
@@ -731,6 +731,57 @@ namespace Vectraze
                 }
             }
         }
+
+        private void RedrawBackgroundOnly()
+        {
+            // Remove old checkerboard/background rectangles
+            var bgRects = PixelCanvas.Children
+                .OfType<Rectangle>()
+                .Where(r => r.Tag as string == "Checkerboard")
+                .ToList();
+            foreach (var rect in bgRects)
+                PixelCanvas.Children.Remove(rect);
+
+            // Redraw background (checkerboard or solid)
+            int pixelWidth = int.Parse(widthTB.Text);
+            int pixelHeight = int.Parse(heightTB.Text);
+            double canvasViewboxWidth = PixelCanvas.Width;
+            double canvasViewboxHeight = PixelCanvas.Height;
+            double cellSizeX = canvasViewboxWidth / pixelWidth;
+            double cellSizeY = canvasViewboxHeight / pixelHeight;
+            double cellSize = Math.Floor(Math.Min(cellSizeX, cellSizeY));
+            if (cellSize < 1) cellSize = 1;
+            double totalImageWidth = pixelWidth * cellSize;
+            double totalImageHeight = pixelHeight * cellSize;
+            double offsetX = Math.Floor((canvasViewboxWidth - totalImageWidth) / 2);
+            double offsetY = Math.Floor((canvasViewboxHeight - totalImageHeight) / 2);
+
+            if (userBackgroundColor.HasValue)
+            {
+                PixelCanvas.Background = new SolidColorBrush(userBackgroundColor.Value);
+            }
+            else
+            {
+                PixelCanvas.Background = Brushes.Transparent;
+                for (int y = 0; y < pixelHeight; y++)
+                {
+                    for (int x = 0; x < pixelWidth; x++)
+                    {
+                        Rectangle bgSquare = new Rectangle
+                        {
+                            Width = cellSize,
+                            Height = cellSize,
+                            Fill = new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gainsboro),
+                            Tag = "Checkerboard"
+                        };
+                        Canvas.SetLeft(bgSquare, offsetX + x * cellSize);
+                        Canvas.SetTop(bgSquare, offsetY + y * cellSize);
+                        PixelCanvas.Children.Insert(0, bgSquare);
+                    }
+                }
+            }
+        }
+
 
         // Helper for color matching with tolerance
         private static bool IsColorMatch(Color a, Color b, int tolerance)
