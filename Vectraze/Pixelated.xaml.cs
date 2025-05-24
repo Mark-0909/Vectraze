@@ -21,6 +21,9 @@ namespace Vectraze
         private double aspectRatio;
         public int targetSize = 32; // Default or initial target size
         private bool isPaintMode = false;
+        private bool isPainting = false;
+        private bool hasPushedUndoForDrag = false;
+
         private Color selectedColor = Colors.Black; // Default paint color
         private Color? userBackgroundColor = null;
 
@@ -246,18 +249,22 @@ namespace Vectraze
         {
             if (isPaintMode && sender is Rectangle rect)
             {
-                if (rect.Fill is SolidColorBrush oldBrush && oldBrush.Color == selectedColor)
+                if (!isPainting)
                 {
-                    // No change, do nothing
+                    // Start of a new drag
+                    isPainting = true;
+                    hasPushedUndoForDrag = false;
+                    Mouse.Capture(PixelCanvas); // Capture mouse for drag painting
                 }
-                else
-                {
-                    PushUndoState();
-                    rect.Fill = new SolidColorBrush(selectedColor);
-                }
-                e.Handled = true; // Prevent canvas drag
+
+                PaintRectangle(rect);
+                e.Handled = true;
             }
         }
+
+
+
+
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -431,28 +438,41 @@ namespace Vectraze
 
         private void PixelCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!isPaintMode && lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)
+            if (isPaintMode && isPainting)
             {
-                Point currentPos = e.GetPosition(ScrollArea);
-                double dX = currentPos.X - lastDragPoint.Value.X;
-                double dY = currentPos.Y - lastDragPoint.Value.Y;
-
-                ScrollArea.ScrollToHorizontalOffset(ScrollArea.HorizontalOffset - dX);
-                ScrollArea.ScrollToVerticalOffset(ScrollArea.VerticalOffset - dY);
-
-                lastDragPoint = currentPos;
+                Point pos = e.GetPosition(PixelCanvas);
+                HitTestResult hit = VisualTreeHelper.HitTest(PixelCanvas, pos);
+                if (hit != null && hit.VisualHit is Rectangle rect && rect.Tag is Point)
+                {
+                    PaintRectangle(rect);
+                }
             }
         }
+
 
         private void PixelCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (!isPaintMode)
+            if (isPaintMode)
             {
-                PixelCanvas.ReleaseMouseCapture();
-                lastDragPoint = null;
-                PixelCanvas.Cursor = Cursors.Cross; // Or your default paint cursor
+                isPainting = false;
+                hasPushedUndoForDrag = false;
+                Mouse.Capture(null); // Release mouse capture
             }
         }
+
+        private void PaintRectangle(Rectangle rect)
+        {
+            if (rect.Fill is SolidColorBrush brush && brush.Color != selectedColor)
+            {
+                if (!hasPushedUndoForDrag)
+                {
+                    PushUndoState();
+                    hasPushedUndoForDrag = true;
+                }
+                rect.Fill = new SolidColorBrush(selectedColor);
+            }
+        }
+
 
         private bool _isUpdatingTextBoxes = false; // Flag to prevent event recursion
 
