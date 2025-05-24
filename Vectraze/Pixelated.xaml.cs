@@ -695,6 +695,51 @@ namespace Vectraze
             });
         }
 
+        private void RemoveBgBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // Push undo state before making changes
+            PushUndoState();
+
+            // Heuristic: Use the color of the top-left pixel as the background color
+            Color? bgColor = null;
+            foreach (var rect in GetPixelRectangles())
+            {
+                if (rect.Tag is Point pt && pt.X == 0 && pt.Y == 0 && rect.Fill is SolidColorBrush brush)
+                {
+                    bgColor = brush.Color;
+                    break;
+                }
+            }
+            if (bgColor == null)
+            {
+                System.Windows.MessageBox.Show("Could not determine background color.", "Remove Background", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Tolerance for color matching (0 = exact, higher = more lenient)
+            const int tolerance = 8;
+
+            foreach (var rect in GetPixelRectangles())
+            {
+                if (rect.Fill is SolidColorBrush brush)
+                {
+                    var color = brush.Color;
+                    if (IsColorMatch(color, bgColor.Value, tolerance))
+                    {
+                        rect.Fill = new SolidColorBrush(Color.FromArgb(0, color.R, color.G, color.B)); // Set alpha to 0 (transparent)
+                    }
+                }
+            }
+        }
+
+        // Helper for color matching with tolerance
+        private static bool IsColorMatch(Color a, Color b, int tolerance)
+        {
+            return Math.Abs(a.R - b.R) <= tolerance &&
+                   Math.Abs(a.G - b.G) <= tolerance &&
+                   Math.Abs(a.B - b.B) <= tolerance;
+        }
+
         private void SaturateBtn_Click(object sender, RoutedEventArgs e)
         {
             PushUndoState();

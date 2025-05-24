@@ -297,7 +297,7 @@
                             </Popup>
                         </StackPanel>
                     </GroupBox>
-
+                    <Button x:Name="RemoveBgBtn" Content="Remove BG" Click="RemoveBgBtn_Click" Margin="2"/>
                     <GroupBox Header="Image Effects" Style="{StaticResource CustomGroupBoxStyle}">
                         <StackPanel>
                             <Button x:Name="GrayscleBtn" Content="Grayscale" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Click="GrayscleBtn_Click"/>
