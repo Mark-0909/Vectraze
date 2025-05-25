@@ -212,6 +212,7 @@
                                 MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
                                 MouseMove="PixelCanvas_MouseMove"
                                 MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"
+                                MouseLeave="PixelCanvas_MouseLeave"
                                 Cursor="Cross"
                                 SnapsToDevicePixels="True"
                                 ClipToBounds="True"

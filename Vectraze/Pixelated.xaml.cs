@@ -391,7 +391,20 @@ namespace Vectraze
                     PaintRectangle(rect);
                 }
             }
+            else if (!isPaintMode && lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)
+            {
+                // Panning logic
+                Point currentPos = e.GetPosition(ScrollArea);
+                double dX = currentPos.X - lastDragPoint.Value.X;
+                double dY = currentPos.Y - lastDragPoint.Value.Y;
+
+                ScrollArea.ScrollToHorizontalOffset(ScrollArea.HorizontalOffset - dX);
+                ScrollArea.ScrollToVerticalOffset(ScrollArea.VerticalOffset - dY);
+
+                lastDragPoint = currentPos;
+            }
         }
+
 
         private void PixelCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -401,7 +414,24 @@ namespace Vectraze
                 hasPushedUndoForDrag = false;
                 Mouse.Capture(null);
             }
+            else
+            {
+                PixelCanvas.ReleaseMouseCapture();
+                lastDragPoint = null;
+                PixelCanvas.Cursor = Cursors.Cross; // Or your default cursor
+            }
         }
+
+        private void PixelCanvas_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (!isPaintMode && PixelCanvas.IsMouseCaptured)
+            {
+                PixelCanvas.ReleaseMouseCapture();
+                lastDragPoint = null;
+                PixelCanvas.Cursor = Cursors.Cross; // Or your default cursor
+            }
+        }
+
 
         private void PaintRectangle(Rectangle rect)
         {
