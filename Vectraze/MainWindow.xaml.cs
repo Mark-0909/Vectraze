@@ -47,6 +47,7 @@ namespace Vectraze
             }
             catch (Exception ex)
             {
+                
                 MessageBox.Show($"Error loading image: {ex.Message}", "Image Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ClearImagePreview();
             }

@@ -54,64 +54,52 @@ namespace Vectraze
             SelectedColorPreview.Fill = new SolidColorBrush(selectedColor);
             UpdateBgColorPreview();
 
-
             PixelCanvas.Loaded += (s, e) =>
             {
-                // Ensure targetSize is based on initial TextBox values if they are different
                 if (int.TryParse(widthTB.Text, out int initialWidth) && int.TryParse(heightTB.Text, out int initialHeight))
                 {
-                    targetSize = Math.Max(initialWidth, initialHeight); // Or choose a different logic
+                    targetSize = Math.Max(initialWidth, initialHeight);
                 }
                 RenderPixelatedImage(originalImage, targetSize);
                 PushUndoState(); // Initial state
             };
-
-            // No need for these explicit event handlers if they only call RenderPixelatedImage
-            // widthTB.TextChanged += WidthTB_TextChange;
-            // heightTB.TextChanged += HeightTB_TextChange;
         }
 
         private void RenderPixelatedImage(BitmapImage image, int size, bool forExport = false)
         {
-            targetSize = size; // Update the class field
+            targetSize = size;
             int pixelWidth, pixelHeight;
 
-            if (aspectRatio >= 1.0) // Landscape or square
+            if (aspectRatio >= 1.0)
             {
                 pixelWidth = targetSize;
                 pixelHeight = Math.Max(1, (int)Math.Round(targetSize / aspectRatio));
             }
-            else // Portrait
+            else
             {
                 pixelHeight = targetSize;
                 pixelWidth = Math.Max(1, (int)Math.Round(targetSize * aspectRatio));
             }
 
-            // Update TextBoxes without triggering recursive calls if Render is called from TextChanged
-            // This is safer done directly if RenderPixelatedImage is not called from TextChanged
             if (widthTB.Text != pixelWidth.ToString()) widthTB.Text = pixelWidth.ToString();
             if (heightTB.Text != pixelHeight.ToString()) heightTB.Text = pixelHeight.ToString();
-
 
             TransformedBitmap resized = new TransformedBitmap(image, new ScaleTransform(
                 pixelWidth / (double)image.PixelWidth,
                 pixelHeight / (double)image.PixelHeight));
             resized.Freeze();
 
-
             int stride = pixelWidth * 4; // BGRA
             byte[] pixels = new byte[stride * pixelHeight];
             resized.CopyPixels(pixels, stride, 0);
 
-            // Use the actual allocated size of the canvas for calculations
-            double canvasViewboxWidth = PixelCanvas.Width;  // The size defined in XAML or set programmatically for Viewbox scaling
+            double canvasViewboxWidth = PixelCanvas.Width;
             double canvasViewboxHeight = PixelCanvas.Height;
-
 
             double cellSizeX = canvasViewboxWidth / pixelWidth;
             double cellSizeY = canvasViewboxHeight / pixelHeight;
             double cellSize = Math.Floor(Math.Min(cellSizeX, cellSizeY));
-            if (cellSize < 1) cellSize = 1; // Ensure at least 1x1 pixel cells
+            if (cellSize < 1) cellSize = 1;
 
             double totalImageWidth = pixelWidth * cellSize;
             double totalImageHeight = pixelHeight * cellSize;
@@ -119,7 +107,7 @@ namespace Vectraze
             double offsetX = Math.Floor((canvasViewboxWidth - totalImageWidth) / 2);
             double offsetY = Math.Floor((canvasViewboxHeight - totalImageHeight) / 2);
 
-            PixelCanvas.Children.Clear(); // Clear previous drawing
+            PixelCanvas.Children.Clear();
 
             if (userBackgroundColor.HasValue)
             {
@@ -128,7 +116,7 @@ namespace Vectraze
             else
             {
                 PixelCanvas.Background = Brushes.Transparent;
-                if (!forExport) // Only draw checkerboard if not exporting and no user background
+                if (!forExport)
                 {
                     for (int y = 0; y < pixelHeight; y++)
                     {
@@ -138,8 +126,8 @@ namespace Vectraze
                             {
                                 Width = cellSize,
                                 Height = cellSize,
-                                Fill = new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gainsboro), // Lighter checkerboard
-                                Tag = "Checkerboard" // Tag for easy removal later
+                                Fill = new SolidColorBrush((x + y) % 2 == 0 ? Colors.LightGray : Colors.Gainsboro),
+                                Tag = "Checkerboard"
                             };
                             Canvas.SetLeft(bgSquare, offsetX + x * cellSize);
                             Canvas.SetTop(bgSquare, offsetY + y * cellSize);
@@ -149,7 +137,6 @@ namespace Vectraze
                 }
             }
 
-            // Draw image pixels as rectangles
             for (int y = 0; y < pixelHeight; y++)
             {
                 for (int x = 0; x < pixelWidth; x++)
@@ -165,17 +152,16 @@ namespace Vectraze
                         Width = cellSize,
                         Height = cellSize,
                         Fill = new SolidColorBrush(Color.FromArgb(a, r, g, b)),
-                        Tag = new Point(x, y) // Store logical pixel position
+                        Tag = new Point(x, y)
                     };
 
                     Canvas.SetLeft(rect, offsetX + x * cellSize);
                     Canvas.SetTop(rect, offsetY + y * cellSize);
-                    rect.MouseLeftButtonDown += PixelRect_MouseLeftButtonDown; // For paint mode
+                    rect.MouseLeftButtonDown += PixelRect_MouseLeftButtonDown;
                     PixelCanvas.Children.Add(rect);
                 }
             }
         }
-
 
         private IEnumerable<Rectangle> GetPixelRectangles()
         {
@@ -185,54 +171,28 @@ namespace Vectraze
         private void PushUndoState()
         {
             undoStack.Push(new PixelState(GetPixelRectangles(), userBackgroundColor));
-            redoStack.Clear(); // Clear redo stack when a new action is performed
+            redoStack.Clear();
             UpdateUndoRedoButtonStates();
         }
 
         private void RestorePixelState(PixelState state)
         {
-            userBackgroundColor = state.BackgroundColor; // Restore background
-            UpdateBgColorPreview(); // Update UI for background color
+            userBackgroundColor = state.BackgroundColor;
+            UpdateBgColorPreview();
 
-            // Temporarily detach event handlers from TextBoxes to prevent Render loop during restore
             widthTB.TextChanged -= WidthTB_TextChange;
             heightTB.TextChanged -= HeightTB_TextChange;
 
-            // Re-render based on the state's first pixel to get dimensions, or store dimensions in state
-            // For simplicity, we'll re-render using originalImage and a size derived from the state.
-            // This requires storing pixelWidth/Height or targetSize in PixelState or recalculating.
-            // Let's assume the targetSize that led to this state is implicitly handled by re-rendering.
-            // More robustly, PixelState should store the dimensions (pixelWidth, pixelHeight).
+            RenderPixelatedImage(originalImage, targetSize);
 
-            // For now, let's just update fills and re-render if background changed
-            // A full re-render ensures cell sizes are correct if dimensions changed.
-            // The challenge: PixelState stores colors for Point(x,y), but if canvas size changed, RenderPixelatedImage is needed.
-            // For simplicity, if background changed, or if pixel count differs, re-render.
-            // The current RenderPixelatedImage uses 'targetSize'. If undo/redo involves size changes, 'targetSize' also needs to be in PixelState.
-
-            // Simplified Restore:
-            // We need to re-create the visual rectangles based on the stored state.
-            // This means RenderPixelatedImage needs to be able to take a PixelState or raw pixel data.
-            // For now, let's assume RenderPixelatedImage correctly sets up the grid, and we just change colors.
-
-            // Find targetSize from the state if possible (e.g., by max X or Y in state.Pixels)
-            // For now, let's assume the dimensions are consistent with the current targetSize
-            // or that RenderPixelatedImage is called appropriately if dimensions change.
-
-            RenderPixelatedImage(originalImage, targetSize); // Re-render to set up structure and background
-
-            // Now apply the stored pixel colors
             foreach (var rect in GetPixelRectangles())
             {
                 if (rect.Tag is Point pt && state.Pixels.TryGetValue(pt, out var color))
                 {
                     rect.Fill = new SolidColorBrush(color);
                 }
-                // Else, if a pixel from state is not on canvas (e.g. resize smaller), it's ignored.
-                // If canvas has new pixels not in state (e.g. resize larger), they keep their RenderPixelatedImage color.
             }
 
-            // Re-attach event handlers
             widthTB.TextChanged += WidthTB_TextChange;
             heightTB.TextChanged += HeightTB_TextChange;
             UpdateUndoRedoButtonStates();
@@ -244,17 +204,15 @@ namespace Vectraze
             RedoBtn.IsEnabled = redoStack.Count > 0;
         }
 
-
         private void PixelRect_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (isPaintMode && sender is Rectangle rect)
             {
                 if (!isPainting)
                 {
-                    // Start of a new drag
                     isPainting = true;
                     hasPushedUndoForDrag = false;
-                    Mouse.Capture(PixelCanvas); // Capture mouse for drag painting
+                    Mouse.Capture(PixelCanvas);
                 }
 
                 PaintRectangle(rect);
@@ -262,13 +220,27 @@ namespace Vectraze
             }
         }
 
+        private Rect GetPixelGridBounds()
+        {
+            int pixelWidth = int.Parse(widthTB.Text);
+            int pixelHeight = int.Parse(heightTB.Text);
+            double canvasViewboxWidth = PixelCanvas.Width;
+            double canvasViewboxHeight = PixelCanvas.Height;
+            double cellSizeX = canvasViewboxWidth / pixelWidth;
+            double cellSizeY = canvasViewboxHeight / pixelHeight;
+            double cellSize = Math.Floor(Math.Min(cellSizeX, cellSizeY));
+            if (cellSize < 1) cellSize = 1;
+            double totalImageWidth = pixelWidth * cellSize;
+            double totalImageHeight = pixelHeight * cellSize;
+            double offsetX = Math.Floor((canvasViewboxWidth - totalImageWidth) / 2);
+            double offsetY = Math.Floor((canvasViewboxHeight - totalImageHeight) / 2);
 
-
-
+            return new Rect(offsetX, offsetY, totalImageWidth, totalImageHeight);
+        }
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
-            // Temporarily set canvas background for export if userBackgroundColor is set
+            // Save the original background and checkerboard rectangles
             Brush originalCanvasBackground = PixelCanvas.Background;
             List<UIElement> checkerboardRects = new List<UIElement>();
 
@@ -276,7 +248,7 @@ namespace Vectraze
             {
                 PixelCanvas.Background = new SolidColorBrush(userBackgroundColor.Value);
             }
-            else // If transparent background desired for PNG, remove checkerboard
+            else
             {
                 checkerboardRects = PixelCanvas.Children
                                        .OfType<Rectangle>()
@@ -287,48 +259,47 @@ namespace Vectraze
                 {
                     PixelCanvas.Children.Remove(rect);
                 }
-                PixelCanvas.Background = Brushes.Transparent; // Ensure transparent for PNG
+                PixelCanvas.Background = Brushes.Transparent;
             }
-
 
             var originalTransform = PixelCanvas.LayoutTransform;
-            PixelCanvas.LayoutTransform = Transform.Identity; // Reset zoom for rendering
+            PixelCanvas.LayoutTransform = Transform.Identity;
 
-            // Use the actual dimensions derived from pixelWidth/Height and cellSize
-            if (!int.TryParse(widthTB.Text, out int pixelWidth) || !int.TryParse(heightTB.Text, out int pixelHeight))
-            {
-                System.Windows.MessageBox.Show("Invalid canvas dimensions.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+            // Get the bounds of the pixel grid
+            Rect gridBounds = GetPixelGridBounds();
 
-            double tempCellSizeX = PixelCanvas.Width / pixelWidth;
-            double tempCellSizeY = PixelCanvas.Height / pixelHeight;
-            double tempCellSize = Math.Floor(Math.Min(tempCellSizeX, tempCellSizeY));
-            if (tempCellSize < 1) tempCellSize = 1;
+            // Arrange the canvas as usual
+            PixelCanvas.Measure(new Size(PixelCanvas.Width, PixelCanvas.Height));
+            PixelCanvas.Arrange(new Rect(0, 0, PixelCanvas.Width, PixelCanvas.Height));
 
-            Size renderSize = new Size(pixelWidth * tempCellSize, pixelHeight * tempCellSize);
+            // Render the whole canvas to a temporary bitmap
+            RenderTargetBitmap rtbFull = new RenderTargetBitmap(
+                (int)PixelCanvas.Width, (int)PixelCanvas.Height, 96, 96, PixelFormats.Pbgra32);
+            rtbFull.Render(PixelCanvas);
+            rtbFull.Freeze();
 
+            // Crop to the pixel grid area
+            CroppedBitmap cropped = new CroppedBitmap(
+                rtbFull,
+                new Int32Rect(
+                    (int)gridBounds.X,
+                    (int)gridBounds.Y,
+                    (int)gridBounds.Width,
+                    (int)gridBounds.Height
+                )
+            );
 
-            PixelCanvas.Measure(renderSize);
-            PixelCanvas.Arrange(new Rect(renderSize));
-
-            RenderTargetBitmap rtb = new RenderTargetBitmap(
-                (int)renderSize.Width, (int)renderSize.Height, 96, 96, PixelFormats.Pbgra32);
-            rtb.Render(PixelCanvas);
-            rtb.Freeze();
-
-            PixelCanvas.LayoutTransform = originalTransform; // Restore zoom
-            PixelCanvas.Background = originalCanvasBackground; // Restore original live background
+            PixelCanvas.LayoutTransform = originalTransform;
+            PixelCanvas.Background = originalCanvasBackground;
 
             // Restore checkerboard if they were removed
             if (checkerboardRects.Any())
             {
                 foreach (var rect in checkerboardRects)
                 {
-                    PixelCanvas.Children.Insert(0, rect); // Insert at bottom
+                    PixelCanvas.Children.Insert(0, rect);
                 }
             }
-
 
             SaveFileDialog dialog = new SaveFileDialog
             {
@@ -347,43 +318,19 @@ namespace Vectraze
                     case ".jpg":
                     case ".jpeg":
                         var jpegEncoder = new JpegBitmapEncoder();
-                        jpegEncoder.QualityLevel = 90; // Set quality for JPEG
+                        jpegEncoder.QualityLevel = 90;
                         encoder = jpegEncoder;
-                        // For JPG, if original was transparent, you might want to fill with white explicitly
-                        // This is complex if rendering a transparent canvas to JPG.
-                        // The RenderTargetBitmap with Pbgra32 will handle alpha. JPG will likely make transparent areas black or white.
-                        // To ensure white background for JPG:
-                        // Create a new Visual with white background, draw rtb on top, then render that.
-                        // Or, if saving to JPG and originalCanvasBackground was transparent, ensure it was white during rtb.Render
-                        if (PixelCanvas.Background == Brushes.Transparent && (originalCanvasBackground == Brushes.Transparent || originalCanvasBackground == null))
-                        {
-                            // Create a temporary visual with white background
-                            DrawingVisual dv = new DrawingVisual();
-                            using (DrawingContext dc = dv.RenderOpen())
-                            {
-                                dc.DrawRectangle(Brushes.White, null, new Rect(0, 0, rtb.Width, rtb.Height));
-                                dc.DrawImage(rtb, new Rect(0, 0, rtb.Width, rtb.Height));
-                            }
-                            RenderTargetBitmap jpgRtb = new RenderTargetBitmap((int)rtb.PixelWidth, (int)rtb.PixelHeight, 96, 96, PixelFormats.Pbgra32);
-                            jpgRtb.Render(dv);
-                            jpgRtb.Freeze();
-                            encoder.Frames.Add(BitmapFrame.Create(jpgRtb));
-                        }
-                        else
-                        {
-                            encoder.Frames.Add(BitmapFrame.Create(rtb));
-                        }
+                        encoder.Frames.Add(BitmapFrame.Create(cropped));
                         break;
                     case ".bmp":
                         encoder = new BmpBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(rtb));
+                        encoder.Frames.Add(BitmapFrame.Create(cropped));
                         break;
-                    default: // PNG
+                    default:
                         encoder = new PngBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(rtb));
+                        encoder.Frames.Add(BitmapFrame.Create(cropped));
                         break;
                 }
-
 
                 try
                 {
@@ -400,37 +347,34 @@ namespace Vectraze
             }
         }
 
-
         private void ScrollArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (Keyboard.Modifiers == ModifierKeys.Control) // Zoom only with Ctrl + Wheel
+            if (Keyboard.Modifiers == ModifierKeys.Control)
             {
                 const double zoomStep = 0.1;
                 currentZoom += e.Delta > 0 ? zoomStep : -zoomStep;
-                currentZoom = Math.Max(0.1, Math.Min(currentZoom, 10.0)); // Clamp zoom
+                currentZoom = Math.Max(0.1, Math.Min(currentZoom, 10.0));
 
                 canvasScaleTransform.ScaleX = currentZoom;
                 canvasScaleTransform.ScaleY = currentZoom;
 
                 e.Handled = true;
             }
-            // else, let ScrollViewer handle normal scrolling if content is larger than view
         }
-
 
         private void BackBtn_Click(object sender, RoutedEventArgs e)
         {
             Window currentWindow = Window.GetWindow(this);
-            MainWindow mainWindow = new MainWindow(); // Create a new instance of MainWindow
+            MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
-            currentWindow?.Close(); // Close the current window (which hosts Pixelated UserControl)
+            currentWindow?.Close();
         }
 
         private void PixelCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (!isPaintMode && e.ButtonState == MouseButtonState.Pressed)
             {
-                lastDragPoint = e.GetPosition(ScrollArea); // Pan relative to ScrollArea
+                lastDragPoint = e.GetPosition(ScrollArea);
                 PixelCanvas.CaptureMouse();
                 PixelCanvas.Cursor = Cursors.ScrollAll;
             }
@@ -449,14 +393,13 @@ namespace Vectraze
             }
         }
 
-
         private void PixelCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (isPaintMode)
             {
                 isPainting = false;
                 hasPushedUndoForDrag = false;
-                Mouse.Capture(null); // Release mouse capture
+                Mouse.Capture(null);
             }
         }
 
@@ -473,8 +416,7 @@ namespace Vectraze
             }
         }
 
-
-        private bool _isUpdatingTextBoxes = false; // Flag to prevent event recursion
+        private bool _isUpdatingTextBoxes = false;
 
         private void ResizeBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -482,13 +424,9 @@ namespace Vectraze
 
             if (int.TryParse(widthTB.Text, out int newWidth) && int.TryParse(heightTB.Text, out int newHeight) && newWidth > 0 && newHeight > 0)
             {
-                PushUndoState(); // Save state before resize
-
-                // Determine the 'master' dimension for targetSize based on what changed or a preferred logic
-                // For simplicity, let's use the larger of the two as the new targetSize base
+                PushUndoState();
                 targetSize = Math.Max(newWidth, newHeight);
-                aspectRatio = (double)newWidth / newHeight; // Update aspect ratio based on new inputs
-
+                aspectRatio = (double)newWidth / newHeight;
                 RenderPixelatedImage(originalImage, targetSize);
             }
             else
@@ -525,7 +463,6 @@ namespace Vectraze
             _isUpdatingTextBoxes = false;
         }
 
-
         private void ValidateIntegerInput(TextBox textBox)
         {
             string currentText = textBox.Text;
@@ -544,7 +481,7 @@ namespace Vectraze
             ColorPickerPopup.IsOpen = !ColorPickerPopup.IsOpen;
             if (ColorPickerPopup.IsOpen)
             {
-                inlineColorPicker.SelectedColor = selectedColor; // Initialize with current color
+                inlineColorPicker.SelectedColor = selectedColor;
             }
         }
 
@@ -555,21 +492,19 @@ namespace Vectraze
                 selectedColor = e.NewValue.Value;
                 SelectedColorPreview.Fill = new SolidColorBrush(selectedColor);
             }
-            // ColorPickerPopup.IsOpen = false; // Optionally close after selection
         }
 
         private void PaintModeBtn_Click(object sender, RoutedEventArgs e)
         {
             isPaintMode = !isPaintMode;
             PaintModeBtn.Content = isPaintMode ? "Exit Paint Mode" : "Paint Mode";
-            PixelCanvas.Cursor = isPaintMode ? Cursors.Pen : Cursors.Cross; // Or Cursors.ScrollAll if not in paint mode
+            PixelCanvas.Cursor = isPaintMode ? Cursors.Pen : Cursors.Cross;
         }
 
         private void UndoBtn_Click(object sender, RoutedEventArgs e)
         {
             if (undoStack.Count > 0)
             {
-                // Current state becomes a redo state
                 redoStack.Push(new PixelState(GetPixelRectangles(), userBackgroundColor));
                 var prevState = undoStack.Pop();
                 RestorePixelState(prevState);
@@ -581,7 +516,6 @@ namespace Vectraze
         {
             if (redoStack.Count > 0)
             {
-                // Current state becomes an undo state
                 undoStack.Push(new PixelState(GetPixelRectangles(), userBackgroundColor));
                 var nextState = redoStack.Pop();
                 RestorePixelState(nextState);
@@ -594,17 +528,14 @@ namespace Vectraze
             if (userBackgroundColor.HasValue)
             {
                 SelectedBgColorPreview.Fill = new SolidColorBrush(userBackgroundColor.Value);
-                SelectedBgColorPreview.OpacityMask = null; // Show solid color
+                SelectedBgColorPreview.OpacityMask = null;
             }
             else
             {
-                SelectedBgColorPreview.Fill = Brushes.Transparent; // Will show through to checkerboard pattern
-                // Re-apply opacity mask if it was removed
+                SelectedBgColorPreview.Fill = Brushes.Transparent;
                 if (SelectedBgColorPreview.OpacityMask == null)
                 {
                     SelectedBgColorPreview.OpacityMask = (VisualBrush)this.Resources["CheckerboardBrushForPreview"];
-                    // If you defined it directly in XAML, you might need to find it or re-create it.
-                    // For simplicity, the XAML for SelectedBgColorPreview already has the VisualBrush.
                 }
             }
         }
@@ -620,20 +551,18 @@ namespace Vectraze
 
         private void BgInlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            PushUndoState(); // Save state before changing background
+            PushUndoState();
 
-            // If user selects "No Color" or clears it, e.NewValue might be null or transparent
-            if (e.NewValue.HasValue && e.NewValue.Value.A > 0) // Consider fully transparent as "no background"
+            if (e.NewValue.HasValue && e.NewValue.Value.A > 0)
             {
                 userBackgroundColor = e.NewValue.Value;
             }
             else
             {
-                userBackgroundColor = null; // No background color / transparent
+                userBackgroundColor = null;
             }
             UpdateBgColorPreview();
             RedrawBackgroundOnly();
-            // BgColorPickerPopup.IsOpen = false; // Optionally close
         }
 
         private void ApplyFilter(Action<Rectangle, Color> filterAction)
@@ -644,7 +573,7 @@ namespace Vectraze
                 if (rect.Fill is SolidColorBrush brush)
                 {
                     var color = brush.Color;
-                    if (color.A == 0) continue; // Skip fully transparent pixels for most filters
+                    if (color.A == 0) continue;
                     filterAction(rect, color);
                 }
             }
@@ -682,9 +611,8 @@ namespace Vectraze
 
         private void TintBtn_Click(object sender, RoutedEventArgs e)
         {
-            // You might want a way for the user to pick the tint color and strength
-            Color tintColor = Colors.SteelBlue; // Example tint color
-            double tintStrength = 0.3; // 0.0 (no tint) to 1.0 (full color overlay)
+            Color tintColor = Colors.SteelBlue;
+            double tintStrength = 0.3;
 
             ApplyFilter((rect, color) =>
             {
@@ -697,10 +625,8 @@ namespace Vectraze
 
         private void RemoveBgBtn_Click(object sender, RoutedEventArgs e)
         {
-            // Push undo state before making changes
             PushUndoState();
 
-            // Heuristic: Use the color of the top-left pixel as the background color
             Color? bgColor = null;
             foreach (var rect in GetPixelRectangles())
             {
@@ -716,7 +642,6 @@ namespace Vectraze
                 return;
             }
 
-            // Tolerance for color matching (0 = exact, higher = more lenient)
             const int tolerance = 8;
 
             foreach (var rect in GetPixelRectangles())
@@ -726,7 +651,7 @@ namespace Vectraze
                     var color = brush.Color;
                     if (IsColorMatch(color, bgColor.Value, tolerance))
                     {
-                        rect.Fill = new SolidColorBrush(Color.FromArgb(0, color.R, color.G, color.B)); // Set alpha to 0 (transparent)
+                        rect.Fill = new SolidColorBrush(Color.FromArgb(0, color.R, color.G, color.B));
                     }
                 }
             }
@@ -734,7 +659,6 @@ namespace Vectraze
 
         private void RedrawBackgroundOnly()
         {
-            // Remove old checkerboard/background rectangles
             var bgRects = PixelCanvas.Children
                 .OfType<Rectangle>()
                 .Where(r => r.Tag as string == "Checkerboard")
@@ -742,7 +666,6 @@ namespace Vectraze
             foreach (var rect in bgRects)
                 PixelCanvas.Children.Remove(rect);
 
-            // Redraw background (checkerboard or solid)
             int pixelWidth = int.Parse(widthTB.Text);
             int pixelHeight = int.Parse(heightTB.Text);
             double canvasViewboxWidth = PixelCanvas.Width;
@@ -782,8 +705,6 @@ namespace Vectraze
             }
         }
 
-
-        // Helper for color matching with tolerance
         private static bool IsColorMatch(Color a, Color b, int tolerance)
         {
             return Math.Abs(a.R - b.R) <= tolerance &&
@@ -794,23 +715,22 @@ namespace Vectraze
         private void SaturateBtn_Click(object sender, RoutedEventArgs e)
         {
             PushUndoState();
-            double saturateAmount = 0.3; // Increase by 30% (can adjust)
+            double saturateAmount = 0.3;
 
             foreach (var rect in GetPixelRectangles())
             {
                 if (rect.Fill is SolidColorBrush brush)
                 {
                     var color = brush.Color;
-                    if (color.A == 0) continue; // Skip transparent
+                    if (color.A == 0) continue;
 
                     ColorToHsl(color, out double h, out double s, out double l);
-                    s = Math.Min(1.0, s + saturateAmount * (1.0 - s)); // Increase saturation, clamp to 1.0
+                    s = Math.Min(1.0, s + saturateAmount * (1.0 - s));
                     var saturatedColor = HslToColor(h, s, l, color.A);
                     rect.Fill = new SolidColorBrush(saturatedColor);
                 }
             }
         }
-
 
         private static void ColorToHsl(Color color, out double h, out double s, out double l)
         {
@@ -824,7 +744,7 @@ namespace Vectraze
 
             if (max == min)
             {
-                h = s = 0; // achromatic
+                h = s = 0;
             }
             else
             {
@@ -848,7 +768,7 @@ namespace Vectraze
 
             if (s == 0)
             {
-                r = g = b = l; // achromatic
+                r = g = b = l;
             }
             else
             {
