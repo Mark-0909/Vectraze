@@ -7,7 +7,7 @@
              xmlns:local="clr-namespace:Vectraze"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900" Background="#FFE0E0E0">
-
+    
     <UserControl.Resources>
         <!-- General Button Style -->
         <Style x:Key="BaseButtonStyle" TargetType="Button">
@@ -144,54 +144,54 @@
             </Setter>
         </Style>
     </UserControl.Resources>
+    
+    <Grid>  
+       <Grid.RowDefinitions>  
+           <RowDefinition Height="Auto"/>  
+           <!-- Top bar -->  
+           <RowDefinition Height="*"/>  
+           <!-- Main content -->  
+       </Grid.RowDefinitions>  
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <!-- Top bar -->
-            <RowDefinition Height="*"/>
-            <!-- Main content -->
-        </Grid.RowDefinitions>
+       <!-- Top Bar -->  
+       <Border Grid.Row="0" Background="#FF3C8DBC" Padding="8,5">  
+           <Grid>  
+               <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">  
+                   <!-- UNDO BUTTON - Straight Chevron Path -->  
+                   <Button x:Name="UndoBtn"  
+                           Style="{StaticResource IconTopBarButtonStyle}"  
+                           Click="UndoBtn_Click"  
+                           ToolTip="Undo (Ctrl+Z)"  
+                           IsEnabled="False">  
+                       <Path Data="M10,0 L0,10 L10,20"  
+                             Stretch="Uniform"  
+                             Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  
+                             StrokeThickness="2.5"   
+                             StrokeStartLineCap="Round"  
+                             StrokeEndLineCap="Round"  
+                             StrokeLineJoin="Round"/>  
+                   </Button>  
 
-        <!-- Top Bar -->
-        <Border Grid.Row="0" Background="#FF3C8DBC" Padding="8,5">
-            <Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <!-- UNDO BUTTON - Straight Chevron Path -->
-                    <Button x:Name="UndoBtn"
-                            Style="{StaticResource IconTopBarButtonStyle}"
-                            Click="UndoBtn_Click"
-                            ToolTip="Undo (Ctrl+Z)"
-                            IsEnabled="False">
-                        <Path Data="M10,0 L0,10 L10,20"
-                              Stretch="Uniform"
-                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                              StrokeThickness="2.5" 
-                              StrokeStartLineCap="Round"
-                              StrokeEndLineCap="Round"
-                              StrokeLineJoin="Round"/>
-                    </Button>
+                   <!-- REDO BUTTON - Straight Chevron Path -->  
+                   <Button x:Name="RedoBtn"  
+                           Style="{StaticResource IconTopBarButtonStyle}"  
+                           Click="RedoBtn_Click"  
+                           ToolTip="Redo (Ctrl+Y)"  
+                           IsEnabled="False">  
+                       <Path Data="M0,0 L10,10 L0,20"  
+                             Stretch="Uniform"  
+                             Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  
+                             StrokeThickness="2.5"  
+                             StrokeStartLineCap="Round"  
+                             StrokeEndLineCap="Round"  
+                             StrokeLineJoin="Round"/>  
+                   </Button>  
+               </StackPanel>  
+               <Button x:Name="BackBtn" Content="Back to Main" HorizontalAlignment="Right" Style="{StaticResource TopBarButtonStyle}" Click="BackBtn_Click"/>  
+           </Grid>  
+       </Border>  
 
-                    <!-- REDO BUTTON - Straight Chevron Path -->
-                    <Button x:Name="RedoBtn"
-                            Style="{StaticResource IconTopBarButtonStyle}"
-                            Click="RedoBtn_Click"
-                            ToolTip="Redo (Ctrl+Y)"
-                            IsEnabled="False">
-                        <Path Data="M0,0 L10,10 L0,20"
-                              Stretch="Uniform"
-                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                              StrokeThickness="2.5"
-                              StrokeStartLineCap="Round"
-                              StrokeEndLineCap="Round"
-                              StrokeLineJoin="Round"/>
-                    </Button>
-                </StackPanel>
-                <Button x:Name="BackBtn" Content="Back to Main" HorizontalAlignment="Right" Style="{StaticResource TopBarButtonStyle}" Click="BackBtn_Click"/>
-            </Grid>
-        </Border>
-
-        <!-- Main Content Area -->
+       <!-- Main Content Area -->
         <Grid Grid.Row="1" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
@@ -201,24 +201,24 @@
 
             <!-- Canvas Area -->
             <Border Grid.Column="0" BorderBrush="#FFB0B0B0" BorderThickness="1" Background="White" CornerRadius="3" Padding="5">
-                <ScrollViewer x:Name="ScrollArea"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto"
-                              PreviewMouseWheel="ScrollArea_PreviewMouseWheel">
+                <ScrollViewer x:Name="ScrollArea"  
+                             HorizontalScrollBarVisibility="Auto"  
+                             VerticalScrollBarVisibility="Auto"  
+                             PreviewMouseWheel="ScrollArea_PreviewMouseWheel">
                     <Viewbox Stretch="Uniform">
-                        <Canvas x:Name="PixelCanvas"
-                                Width="512" Height="512"
-                                Background="Transparent"
-                                MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"
-                                MouseMove="PixelCanvas_MouseMove"
-                                MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"
-                                MouseLeave="PixelCanvas_MouseLeave"
-                                Cursor="Cross"
-                                SnapsToDevicePixels="True"
-                                ClipToBounds="True"
-                                FocusVisualStyle="{x:Null}"
-                                RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                UseLayoutRounding="True">
+                        <Canvas x:Name="PixelCanvas"  
+                               Width="512" Height="512"  
+                               Background="Transparent"  
+                               MouseLeftButtonDown="PixelCanvas_MouseLeftButtonDown"  
+                               MouseMove="PixelCanvas_MouseMove"  
+                               MouseLeftButtonUp="PixelCanvas_MouseLeftButtonUp"  
+                               MouseLeave="PixelCanvas_MouseLeave"  
+                               Cursor="Cross"  
+                               SnapsToDevicePixels="True"  
+                               ClipToBounds="True"  
+                               FocusVisualStyle="{x:Null}"  
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"  
+                               UseLayoutRounding="True">
                             <Canvas.LayoutTransform>
                                 <ScaleTransform x:Name="canvasScaleTransform" ScaleX="1" ScaleY="1"/>
                             </Canvas.LayoutTransform>
@@ -228,7 +228,6 @@
             </Border>
 
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" ShowsPreview="True"/>
-
 
             <!-- Controls Panel -->
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Padding="10,0,0,0">
@@ -247,10 +246,8 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Column="0" Text="Width:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <!-- Ensure this x:Name is present and correct -->
                                 <TextBox Grid.Column="1" x:Name="widthTB" Text="32" Style="{StaticResource InputTextBoxStyle}" TextChanged="WidthTB_TextChange"/>
                                 <TextBlock Grid.Column="2" Text="Height:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-                                <!-- Ensure this x:Name is present and correct -->
                                 <TextBox Grid.Column="3" x:Name="heightTB" Text="32" Style="{StaticResource InputTextBoxStyle}" TextChanged="HeightTB_TextChange"/>
                             </Grid>
                             <Button x:Name="ResizeBtn" Content="Apply Size" Style="{StaticResource ToolButtonStyle}" HorizontalAlignment="Stretch" Margin="0,8,0,0" Click="ResizeBtn_Click"/>
@@ -300,18 +297,14 @@
                                 </Border>
                             </Popup>
 
-                            <!-- MODIFIED/MOVED Remove BG Button -->
-                            <Button x:Name="RemoveBgBtn"
-                                    Content="Remove BG"
-                                    Click="RemoveBgBtn_Click"
-                                    Style="{StaticResource ToolButtonStyle}"
-                                    HorizontalAlignment="Stretch"
-                                    Margin="0,10,0,0"/>
+                            <Button x:Name="RemoveBgBtn"  
+                                   Content="Remove BG"  
+                                   Click="RemoveBgBtn_Click"  
+                                   Style="{StaticResource ToolButtonStyle}"  
+                                   HorizontalAlignment="Stretch"  
+                                   Margin="0,10,0,0"/>
                         </StackPanel>
                     </GroupBox>
-
-                    <!-- OLD POSITION of RemoveBgBtn - This line should be deleted -->
-                    <!-- <Button x:Name="RemoveBgBtn" Content="Remove BG" Click="RemoveBgBtn_Click" Margin="2"/> -->
 
                     <GroupBox Header="Image Effects" Style="{StaticResource CustomGroupBoxStyle}">
                         <StackPanel>
@@ -327,6 +320,21 @@
                 </StackPanel>
             </ScrollViewer>
         </Grid>
+        <Grid x:Name="LoadingOverlay" Visibility="Collapsed" Background="#80000080" Panel.ZIndex="100">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border Background="#FFF" CornerRadius="12" Padding="32,24" Opacity="0.97">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock x:Name="LoadingMessage"
+                           Text="Processing..."
+                           FontWeight="Bold"
+                           FontSize="20"
+                           Foreground="#222"
+                           HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
     </Grid>
 
 </UserControl>
