@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Vectraze"
         mc:Ignorable="d"
-        Title="Vectraze Image Rasterizer" Height="550" Width="900" Background="White" WindowStartupLocation="CenterScreen">
+        Title="Vectraze Image Rasterizer" Height="550" Width="900" Background="White" WindowStartupLocation="CenterScreen" Icon="/logoicon.ico">
 
     <Window.Resources>
         <!-- Style for the Rasterized Button -->

@@ -45,6 +45,10 @@ namespace Vectraze
         private Stack<PixelState> undoStack = new();
         private Stack<PixelState> redoStack = new();
 
+        /// <summary>
+        /// Initializes a new instance of the Pixelated UserControl with the provided bitmap image.
+        /// </summary>
+        /// <param name="bitmapImage">The source image to pixelate.</param>
         public Pixelated(BitmapImage bitmapImage)
         {
             InitializeComponent();
@@ -67,6 +71,12 @@ namespace Vectraze
             };
         }
 
+        /// <summary>
+        /// Renders the pixelated version of the image onto the canvas.
+        /// </summary>
+        /// <param name="image">The source image.</param>
+        /// <param name="size">The target size for pixelation.</param>
+        /// <param name="forExport">If true, renders for export (no checkerboard background).</param>
         private void RenderPixelatedImage(BitmapImage image, int size, bool forExport = false)
         {
             targetSize = size;
@@ -165,11 +175,17 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Gets all Rectangle elements representing pixels on the canvas.
+        /// </summary>
         private IEnumerable<Rectangle> GetPixelRectangles()
         {
             return PixelCanvas.Children.OfType<Rectangle>().Where(r => r.Tag is Point);
         }
 
+        /// <summary>
+        /// Pushes the current pixel state onto the undo stack and clears the redo stack.
+        /// </summary>
         private void PushUndoState()
         {
             undoStack.Push(new PixelState(GetPixelRectangles(), userBackgroundColor));
@@ -177,6 +193,10 @@ namespace Vectraze
             UpdateUndoRedoButtonStates();
         }
 
+        /// <summary>
+        /// Restores the pixel and background state from a given PixelState object.
+        /// </summary>
+        /// <param name="state">The state to restore.</param>
         private void RestorePixelState(PixelState state)
         {
             userBackgroundColor = state.BackgroundColor;
@@ -200,12 +220,18 @@ namespace Vectraze
             UpdateUndoRedoButtonStates();
         }
 
+        /// <summary>
+        /// Updates the enabled state of the Undo and Redo buttons.
+        /// </summary>
         private void UpdateUndoRedoButtonStates()
         {
             UndoBtn.IsEnabled = undoStack.Count > 0;
             RedoBtn.IsEnabled = redoStack.Count > 0;
         }
 
+        /// <summary>
+        /// Handles painting a pixel when in paint mode.
+        /// </summary>
         private void PixelRect_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (isPaintMode && sender is Rectangle rect)
@@ -222,6 +248,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Calculates the bounds of the pixel grid on the canvas.
+        /// </summary>
         private Rect GetPixelGridBounds()
         {
             int pixelWidth = int.Parse(widthTB.Text);
@@ -240,6 +269,9 @@ namespace Vectraze
             return new Rect(offsetX, offsetY, totalImageWidth, totalImageHeight);
         }
 
+        /// <summary>
+        /// Handles saving the current pixelated image to a file.
+        /// </summary>
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
             // Save the original background and checkerboard rectangles
@@ -349,6 +381,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Handles zooming in and out of the canvas with the mouse wheel.
+        /// </summary>
         private void ScrollArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (Keyboard.Modifiers == ModifierKeys.Control)
@@ -364,6 +399,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Navigates back to the main window.
+        /// </summary>
         private void BackBtn_Click(object sender, RoutedEventArgs e)
         {
             Window currentWindow = Window.GetWindow(this);
@@ -372,6 +410,9 @@ namespace Vectraze
             currentWindow?.Close();
         }
 
+        /// <summary>
+        /// Handles the start of a drag operation for panning the canvas.
+        /// </summary>
         private void PixelCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (!isPaintMode && e.ButtonState == MouseButtonState.Pressed)
@@ -382,6 +423,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Handles mouse movement for painting or panning.
+        /// </summary>
         private void PixelCanvas_MouseMove(object sender, MouseEventArgs e)
         {
             if (isPaintMode && isPainting)
@@ -407,7 +451,9 @@ namespace Vectraze
             }
         }
 
-
+        /// <summary>
+        /// Handles the end of a mouse drag for painting or panning.
+        /// </summary>
         private void PixelCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (isPaintMode)
@@ -424,6 +470,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Handles mouse leaving the canvas, ending any drag operation.
+        /// </summary>
         private void PixelCanvas_MouseLeave(object sender, MouseEventArgs e)
         {
             if (!isPaintMode && PixelCanvas.IsMouseCaptured)
@@ -434,7 +483,10 @@ namespace Vectraze
             }
         }
 
-
+        /// <summary>
+        /// Paints a rectangle with the currently selected color.
+        /// </summary>
+        /// <param name="rect">The rectangle to paint.</param>
         private void PaintRectangle(Rectangle rect)
         {
             if (rect.Fill is SolidColorBrush brush && brush.Color != selectedColor)
@@ -450,8 +502,9 @@ namespace Vectraze
 
         private bool _isUpdatingTextBoxes = false;
 
-        
-
+        /// <summary>
+        /// Handles resizing the pixel grid based on user input.
+        /// </summary>
         private async void ResizeBtn_Click(object sender, RoutedEventArgs e)
         {
             if (_isUpdatingTextBoxes) return;
@@ -477,6 +530,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Handles changes to the height TextBox, maintaining aspect ratio.
+        /// </summary>
         private void HeightTB_TextChange(object sender, TextChangedEventArgs e)
         {
             if (_isUpdatingTextBoxes || !heightTB.IsFocused) return;
@@ -491,6 +547,9 @@ namespace Vectraze
             _isUpdatingTextBoxes = false;
         }
 
+        /// <summary>
+        /// Handles changes to the width TextBox, maintaining aspect ratio.
+        /// </summary>
         private void WidthTB_TextChange(object sender, TextChangedEventArgs e)
         {
             if (_isUpdatingTextBoxes || !widthTB.IsFocused) return;
@@ -505,6 +564,10 @@ namespace Vectraze
             _isUpdatingTextBoxes = false;
         }
 
+        /// <summary>
+        /// Validates that a TextBox contains only integer digits.
+        /// </summary>
+        /// <param name="textBox">The TextBox to validate.</param>
         private void ValidateIntegerInput(TextBox textBox)
         {
             string currentText = textBox.Text;
@@ -518,6 +581,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Toggles the color picker popup for selecting the paint color.
+        /// </summary>
         private void ColorPickerBtn_Click(object sender, RoutedEventArgs e)
         {
             ColorPickerPopup.IsOpen = !ColorPickerPopup.IsOpen;
@@ -527,6 +593,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Handles changes to the selected paint color.
+        /// </summary>
         private void InlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             if (e.NewValue.HasValue)
@@ -536,6 +605,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Toggles paint mode on or off.
+        /// </summary>
         private void PaintModeBtn_Click(object sender, RoutedEventArgs e)
         {
             isPaintMode = !isPaintMode;
@@ -543,6 +615,9 @@ namespace Vectraze
             PixelCanvas.Cursor = isPaintMode ? Cursors.Pen : Cursors.Cross;
         }
 
+        /// <summary>
+        /// Undoes the last pixel or background change.
+        /// </summary>
         private void UndoBtn_Click(object sender, RoutedEventArgs e)
         {
             if (undoStack.Count > 0)
@@ -557,6 +632,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Redoes the last undone pixel or background change.
+        /// </summary>
         private void RedoBtn_Click(object sender, RoutedEventArgs e)
         {
             if (redoStack.Count > 0)
@@ -571,6 +649,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Updates the background color preview UI.
+        /// </summary>
         private void UpdateBgColorPreview()
         {
             if (userBackgroundColor.HasValue)
@@ -588,6 +669,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Toggles the background color picker popup.
+        /// </summary>
         private void BgColorPickerBtn_Click(object sender, RoutedEventArgs e)
         {
             BgColorPickerPopup.IsOpen = !BgColorPickerPopup.IsOpen;
@@ -597,6 +681,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Handles changes to the selected background color.
+        /// </summary>
         private void BgInlineColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             PushUndoState();
@@ -613,6 +700,10 @@ namespace Vectraze
             RedrawBackgroundOnly();
         }
 
+        /// <summary>
+        /// Applies a filter action to all pixel rectangles.
+        /// </summary>
+        /// <param name="filterAction">The filter to apply to each pixel.</param>
         private void ApplyFilter(Action<Rectangle, Color> filterAction)
         {
             PushUndoState();
@@ -627,6 +718,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Applies a grayscale filter to the image.
+        /// </summary>
         private async void GrayscleBtn_Click(object sender, RoutedEventArgs e)
         {
             ShowLoading("Applying Grayscale...");
@@ -651,6 +745,9 @@ namespace Vectraze
             HideLoading();
         }
 
+        /// <summary>
+        /// Applies a sepia filter to the image.
+        /// </summary>
         private void SeppiaBtn_Click(object sender, RoutedEventArgs e)
         {
             ApplyFilter((rect, color) =>
@@ -663,6 +760,9 @@ namespace Vectraze
             });
         }
 
+        /// <summary>
+        /// Inverts the colors of the image.
+        /// </summary>
         private void InvertBtn_Click(object sender, RoutedEventArgs e)
         {
             ApplyFilter((rect, color) =>
@@ -672,6 +772,9 @@ namespace Vectraze
             });
         }
 
+        /// <summary>
+        /// Applies a blue tint to the image.
+        /// </summary>
         private void TintBtn_Click(object sender, RoutedEventArgs e)
         {
             Color tintColor = Colors.SteelBlue;
@@ -686,6 +789,9 @@ namespace Vectraze
             });
         }
 
+        /// <summary>
+        /// Removes the background from the image (placeholder for actual logic).
+        /// </summary>
         private async void RemoveBgBtn_Click(object sender, RoutedEventArgs e)
         {
             ShowLoading("Removing Background...");
@@ -697,6 +803,9 @@ namespace Vectraze
             HideLoading();
         }
 
+        /// <summary>
+        /// Redraws only the background (checkerboard or solid color).
+        /// </summary>
         private void RedrawBackgroundOnly()
         {
             var bgRects = PixelCanvas.Children
@@ -745,6 +854,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Determines if two colors match within a given tolerance.
+        /// </summary>
         private static bool IsColorMatch(Color a, Color b, int tolerance)
         {
             return Math.Abs(a.R - b.R) <= tolerance &&
@@ -752,6 +864,9 @@ namespace Vectraze
                    Math.Abs(a.B - b.B) <= tolerance;
         }
 
+        /// <summary>
+        /// Increases the saturation of all pixels.
+        /// </summary>
         private void SaturateBtn_Click(object sender, RoutedEventArgs e)
         {
             PushUndoState();
@@ -772,6 +887,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Converts a Color to HSL values.
+        /// </summary>
         private static void ColorToHsl(Color color, out double h, out double s, out double l)
         {
             double r = color.R / 255.0;
@@ -802,6 +920,9 @@ namespace Vectraze
             }
         }
 
+        /// <summary>
+        /// Converts HSL values to a Color.
+        /// </summary>
         private static Color HslToColor(double h, double s, double l, byte alpha)
         {
             double r, g, b;
@@ -822,6 +943,9 @@ namespace Vectraze
             return Color.FromArgb(alpha, (byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
         }
 
+        /// <summary>
+        /// Helper for HSL to RGB conversion.
+        /// </summary>
         private static double HueToRgb(double p, double q, double t)
         {
             if (t < 0) t += 1;
@@ -831,6 +955,10 @@ namespace Vectraze
             if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6;
             return p;
         }
+
+        /// <summary>
+        /// Shows a loading overlay with a message.
+        /// </summary>
         private void ShowLoading(string message = "Processing...")
         {
             LoadingOverlay.Visibility = Visibility.Visible;
@@ -838,18 +966,20 @@ namespace Vectraze
             DoEvents();
         }
 
+        /// <summary>
+        /// Hides the loading overlay.
+        /// </summary>
         private void HideLoading()
         {
             LoadingOverlay.Visibility = Visibility.Collapsed;
         }
 
-        // Helper to force UI update
+        /// <summary>
+        /// Forces the UI to process pending events.
+        /// </summary>
         private void DoEvents()
         {
             Application.Current.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, new Action(delegate { }));
         }
-
-        
-        
     }
 }
