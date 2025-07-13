@@ -1,4 +1,4 @@
-# Vextraze
+# Vectraze
 
 
 <p align="center">
@@ -7,7 +7,7 @@
   <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
-Vextraze is a powerful desktop application for Windows that transforms your images into pixel art. Built with WPF (.NET), it provides an intuitive suite of tools perfect for creating game assets, artistic pieces, or just for fun.
+Vectraze is a powerful desktop application for Windows that transforms your images into pixel art. Built with WPF (.NET), it provides an intuitive suite of tools perfect for creating game assets, artistic pieces, or just for fun.
 
 ---
 
@@ -51,9 +51,9 @@ To build and run this project from the source code, you will need:
 
 1.  Clone the repository:
     ```sh
-    git clone https://github.com/your-username/Vextraze.git
+    git clone https://github.com/your-username/Vectraze.git
     ```
-2.  Open the solution file (`Vextraze.sln`) in Visual Studio.
+2.  Open the solution file (`Vectraze.sln`) in Visual Studio.
 3.  Build the solution (`Ctrl+Shift+B`) to restore packages and compile.
 4.  Run the project (`F5`).
 
