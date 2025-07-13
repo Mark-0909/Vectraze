@@ -1,4 +1,4 @@
-# Vextraze Image Rasterizer
+# Vextraze
 
 
 <p align="center">
